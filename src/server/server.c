@@ -5,20 +5,67 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <pthread.h> 
+#include <sys/wait.h> // to use waitpid to collect the zombie process
+#include <signal.h>
+#include "logic/gamestate.h"
+#include "logic/dice.h"
+#include "logic/client_handler.h"
 
-#define PORT 8080
+#define PORT 8888
 #define BUFFER_SIZE 1024
+
+// signal handler for the child process
+void sigchld_handler(int s) {
+    while(waitpid(-1, NULL, WNOHANG) > 0); 
+}
+
+// signal handler for the ctrl + c
+void sigint_handler(int s) {
+    printf("\n[Master] Server shutting down... cleaning up IPC.\n");
+    game_destroy(); // release the shared memory (critical!)
+    exit(0);
+}
 
 int main(){
     int server_fd, new_socket;
     struct sockaddr_in address;
-    int addrlen = sizeof(address);
-    char buffer[BUFFER_SIZE] = {0};
+    struct sigaction sa;
 
-    // Creating socket file descriptor
+    // initialize the game state
+    game_init();
+    
+    // initialize the dice system (random number generator)
+    dice_init();
+
+    // Setup SIGCHLD handler to reap zombie processes
+    sa.sa_handler = sigchld_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+        perror("sigaction SIGCHLD");
+        exit(EXIT_FAILURE);
+    }
+
+    // Setup SIGINT handler for graceful shutdown
+    sa.sa_handler = sigint_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("sigaction SIGINT");
+        exit(EXIT_FAILURE);
+    }
+
+    // create a socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // allow the socket to be reused immediately
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt");
+        close(server_fd);
         exit(EXIT_FAILURE);
     }
 
@@ -33,8 +80,11 @@ int main(){
 
     if (listen(server_fd, 1000) < 0) {
         perror("listen");
+        close(server_fd);
         exit(EXIT_FAILURE);
     }
+
+    printf("[Master] Server listening on port %d\n", PORT);
 
     while (1) {
         struct sockaddr_in client_address;
@@ -43,17 +93,32 @@ int main(){
         // accept a new connection 
         if ((new_socket = accept(server_fd, (struct sockaddr *)&client_address, &client_addrlen)) < 0) {
             perror("accept");
-            exit(EXIT_FAILURE);
+            continue; // Continue accepting instead of exiting
         }
-        printf("New connection from %s:%d\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
-        pthread_t thread;
-        // create a new thread to handle the client
-        pthread_create(&thread, NULL, handle_client, (void *)&new_socket);
 
-        // detach the thread so it can run independently
-        pthread_detach(thread);
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("fork");
+            close(new_socket);
+            continue;
+        }
+        if (pid == 0) {
+            // child process (worker)
+            close(server_fd); // Close server socket in child
+            
+            int *client_socket = malloc(sizeof(int));
+            *client_socket = new_socket;
+            handle_client(client_socket);
+            free(client_socket);
+            exit(0);
+        } else {
+            // parent process (master)
+            close(new_socket); // Close client socket in parent
+        }
     }
 
-
-
+    // Should never reach here, but cleanup if needed
+    close(server_fd);
+    game_destroy();
+    return 0;
 }
