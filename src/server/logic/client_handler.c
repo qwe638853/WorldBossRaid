@@ -73,7 +73,7 @@ static int send_packet(int client_socket, GamePacket *pkt) {
 }
 
 static int handle_join(int client_socket, GamePacket *pkt_in, int *out_player_id) {
-    // TODO: 實作：
+    // TODO: 實作
     // 1. 從 pkt_in->body.join 讀出 username
     // 2. 呼叫 game_player_join() 取得 player_id
     // 3. 組一個 OP_JOIN_RESP 封包，呼叫 send_packet() 回給 client
@@ -93,3 +93,4 @@ static int handle_attack(int client_socket, GamePacket *pkt_in, int player_id) {
     (void)player_id;
     return -1;
 }
+//testtest
