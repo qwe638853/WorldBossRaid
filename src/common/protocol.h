@@ -17,7 +17,7 @@ typedef enum {
     // [Server -> Client]
     OP_JOIN_RESP    = 0x20, // join result
     OP_GAME_STATE   = 0x21, // broadcast the boss state (health update)
-    OP_ERROR        = 0x22  // error
+    OP_ERROR       = 0x22  // error
 } OpCode;
 
 typedef struct __attribute__((packed)) {

@@ -6,7 +6,7 @@
 
 // the core: shared memory structure (Shared Memory Structure)
 // this is the data that is shared by all processes in the OS memory
-typedef struct {
+typedef struct { //shared  memory 共用boss狀態
     int boss_hp;        // the current health of the boss
     int max_hp;         // the maximum health of the boss
     int online_count;   // the number of online players
