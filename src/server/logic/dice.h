@@ -1,25 +1,40 @@
+/* src/server/logic/dice.h */
 #ifndef DICE_H
 #define DICE_H
 
-// Initialize the random number generator for dice rolls
+#include <stdbool.h>
+#include "../../common/protocol.h" // 引用封包結構
+#include "gamestate.h"             // 引用資料層
+
+// --- 戰鬥結果結構 ---
+// Server 計算完畢後，填寫這張表回傳給 Client UI
+typedef struct {
+    int boss_dice;       // Boss 擲出的點數 (1-6)
+    int dmg_dealt;       // 這次對王造成的傷害
+    int dmg_taken;       // 玩家受到的反擊傷害
+    
+    // --- 狀態旗標 ---
+    bool is_win;         // 玩家是否拼點勝利
+    bool is_crit;        // 是否爆擊 (顯示紅字/震動)
+    bool boss_just_died; // 是否剛好擊殺 (觸發全服廣播/換王)
+
+    // --- 新增：彩蛋特效專用欄位 ---
+    bool is_lucky_kill;  // 是否觸發 0.0001% 天選之人 (UI 顯示: LUCKY!!)
+    int current_streak;  // 目前連勝數 (UI 顯示: COMBO x3!!)
+} AttackResult;
+
+// --- 核心函數 ---
+
+// 初始化隨機數種子
 void dice_init();
 
-// Calculate attack damage with randomness
-// Returns a damage value between min_damage and max_damage
-int dice_roll_damage(int min_damage, int max_damage);
-
-// Calculate attack damage with critical hit chance
-// base_damage: base damage value
-// crit_chance: critical hit chance (0.0 to 1.0, e.g., 0.1 = 10%)
-// crit_multiplier: damage multiplier on critical hit (e.g., 2.0 = double damage)
-// Returns the final damage (may be critical)
-int dice_roll_damage_with_crit(int base_damage, float crit_chance, float crit_multiplier);
-
-// Roll a random number between min and max (inclusive)
-int dice_roll_range(int min, int max);
-
-// Roll a random float between 0.0 and 1.0
-float dice_roll_float();
+// 處理攻擊請求
+// 參數:
+//   player_dice: Client 傳來的點數
+//   player_name: 玩家名字
+//   result_out:  (輸出) 詳細戰鬥數據
+//   state_out:   (輸出) 更新後的血量狀態
+void game_process_attack(int player_dice, const char* player_name, 
+                         AttackResult *result_out, Payload_GameState *state_out);
 
 #endif
-
