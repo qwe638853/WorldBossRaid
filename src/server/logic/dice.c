@@ -30,7 +30,7 @@ void game_process_attack(int player_dice, const char* player_name,
 
     // 狀態檢查：如果正在重生或遊戲已結束，攻擊無效
     if (current_state.is_respawning || current_state.stage == BOSS_STAGE_DEAD) {
-        state_out->hp = current_state.current_hp;
+        state_out->boss_hp = current_state.current_hp;
         state_out->max_hp = current_state.max_hp;
         state_out->online_count = current_state.online_count;
         return;
@@ -107,7 +107,7 @@ void game_process_attack(int player_dice, const char* player_name,
     // 3. 再次取得最新狀態 (回傳給 Client 更新血條)
     gamestate_get_snapshot(&current_state);
     
-    state_out->hp = current_state.current_hp;
+    state_out->boss_hp = current_state.current_hp;
     state_out->max_hp = current_state.max_hp;
     state_out->online_count = current_state.online_count;
 }
