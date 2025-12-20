@@ -10,19 +10,22 @@
 #include "logic/gamestate.h"
 #include "logic/dice.h"
 #include "logic/client_handler.h"
+#include "security/tls.h"
 
 #define PORT 8888
 #define BUFFER_SIZE 1024
 
 // signal handler for the child process
 void sigchld_handler(int s) {
+    (void)s; // 避免未使用參數警告
     while(waitpid(-1, NULL, WNOHANG) > 0); 
 }
 
 // signal handler for the ctrl + c
 void sigint_handler(int s) {
+    (void)s; // 避免未使用參數警告
     printf("\n[Master] Server shutting down... cleaning up IPC.\n");
-    game_destroy(); // release the shared memory (critical!)
+    gamestate_destroy(); // release the shared memory (critical!)
     exit(0);
 }
 
@@ -31,8 +34,15 @@ int main(){
     struct sockaddr_in address;
     struct sigaction sa;
 
+    init_openssl();
+    SSL_CTX *ctx = create_tls_context("../src/server/ca/server.crt", "../src/server/ca/server.key");
+    if (!ctx) {
+        perror("Error creating SSL context");
+        exit(EXIT_FAILURE);
+    }
+
     // initialize the game state
-    game_init();
+    gamestate_init();
     
     // initialize the dice system (random number generator)
     dice_init();
@@ -105,11 +115,19 @@ int main(){
         if (pid == 0) {
             // child process (worker)
             close(server_fd); // Close server socket in child
-            
-            int *client_socket = malloc(sizeof(int));
-            *client_socket = new_socket;
-            handle_client(client_socket);
-            free(client_socket);
+
+            // 執行 TLS 握手，將普通 socket 升級為 SSL socket
+            SSL *ssl = perform_tls_handshake(ctx, new_socket);
+            if (!ssl) {
+                fprintf(stderr, "Error performing TLS handshake\n");
+                close(new_socket);
+                exit(EXIT_FAILURE);
+            }
+
+            // 直接傳入 SSL 物件，不需要傳 socket
+            // handle_client 內部會使用 SSL_read/SSL_write 進行加密通訊
+            handle_client(ssl);
+            // 注意：handle_client 內部會負責清理 SSL 資源
             exit(0);
         } else {
             // parent process (master)
@@ -119,6 +137,6 @@ int main(){
 
     // Should never reach here, but cleanup if needed
     close(server_fd);
-    game_destroy();
+    gamestate_destroy();
     return 0;
 }
