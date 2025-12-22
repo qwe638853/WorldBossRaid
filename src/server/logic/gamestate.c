@@ -141,6 +141,7 @@ void gamestate_spawn_next_boss() {
         shm->stage = BOSS_STAGE_DEAD;
         shm->current_hp = 0;
         LOG_INFO("All Bosses Defeated. Game Complete!");
+        LOG_INFO("=== CONGRATULATIONS! WORLD BOSS RAID CLEARED ===");
     }
     
     // 解除重生鎖定，清空擊殺者
