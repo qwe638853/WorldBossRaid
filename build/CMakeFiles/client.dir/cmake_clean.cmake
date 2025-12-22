@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/client.dir/src/client/ui/boss.c.o.d"
   "CMakeFiles/client.dir/src/client/ui/player.c.o"
   "CMakeFiles/client.dir/src/client/ui/player.c.o.d"
+  "CMakeFiles/client.dir/src/common/log.c.o"
+  "CMakeFiles/client.dir/src/common/log.c.o.d"
   "CMakeFiles/client.dir/src/common/tls.c.o"
   "CMakeFiles/client.dir/src/common/tls.c.o.d"
   "client"

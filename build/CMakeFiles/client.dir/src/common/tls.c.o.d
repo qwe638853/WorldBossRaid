@@ -120,4 +120,6 @@ CMakeFiles/client.dir/src/common/tls.c.o: \
  /usr/include/openssl/err.h /usr/include/errno.h \
  /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
  /usr/include/x86_64-linux-gnu/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /home/WorldBossRaid/src/common/log.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdbool.h

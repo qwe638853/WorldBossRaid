@@ -1,9 +1,9 @@
 /* src/server/logic/dice.c */
 #include "dice.h"
+#include "../../common/log.h"
 #include <stdlib.h> // for rand, srand
 #include <time.h>   // for time
 #include <string.h> // for memset
-#include <stdio.h>  // for printf
 
 // 定義一擊必殺的傷害數值
 #define INSTANT_KILL_DAMAGE 999999
@@ -11,7 +11,7 @@
 // 初始化隨機數系統
 void dice_init() {
     srand(time(NULL));
-    printf("[DiceLogic] Random Number Generator Initialized.\n");
+    LOG_DEBUG("Random Number Generator Initialized");
 }
 
 // 核心戰鬥處理函式
@@ -46,7 +46,7 @@ void game_process_attack(int player_dice, const char* player_name,
     bool is_lucky_kill = (rand() % 1000000) == 777777;
 
     if (is_lucky_kill) {
-        printf("!!! [DiceLogic] EASTER EGG: %s triggered LUCKY KILL! !!!\n", player_name);
+        LOG_WARN("EASTER EGG: %s triggered LUCKY KILL! (0.0001%% chance)", player_name);
         
         // 設定回傳狀態
         result_out->is_win = true;
@@ -78,7 +78,7 @@ void game_process_attack(int player_dice, const char* player_name,
         result_out->current_streak = streak;
 
         if (streak >= 3) {
-            printf("!!! [DiceLogic] EASTER EGG: %s triggered 3-COMBO KILL! (Dice: %d) !!!\n", player_name, player_dice);
+            LOG_WARN("EASTER EGG: %s triggered 3-COMBO KILL! (Dice: %d)", player_name, player_dice);
             result_out->is_crit = true; 
             result_out->dmg_dealt = INSTANT_KILL_DAMAGE; // 秒殺
         }

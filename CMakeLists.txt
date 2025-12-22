@@ -25,7 +25,9 @@ set(SERVER_SOURCES
     src/server/logic/client_handler.c
     src/server/logic/gamestate.c
     src/server/logic/dice.c
+    src/server/security/replay_protection.c
     src/common/tls.c
+    src/common/log.c
 )
 
 add_executable(server ${SERVER_SOURCES})
@@ -115,6 +117,7 @@ set(CLIENT_SOURCES
     src/client/ui/player.c
     src/client/ui/boss.c
     src/common/tls.c
+    src/common/log.c
 )
 
 add_executable(client ${CLIENT_SOURCES})

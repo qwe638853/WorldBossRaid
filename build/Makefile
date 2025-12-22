@@ -214,6 +214,33 @@ src/client/ui/player.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/player.c.s
 .PHONY : src/client/ui/player.c.s
 
+src/common/log.o: src/common/log.c.o
+.PHONY : src/common/log.o
+
+# target to build an object file
+src/common/log.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/log.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/log.c.o
+.PHONY : src/common/log.c.o
+
+src/common/log.i: src/common/log.c.i
+.PHONY : src/common/log.i
+
+# target to preprocess a source file
+src/common/log.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/log.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/log.c.i
+.PHONY : src/common/log.c.i
+
+src/common/log.s: src/common/log.c.s
+.PHONY : src/common/log.s
+
+# target to generate assembly for a file
+src/common/log.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/log.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/log.c.s
+.PHONY : src/common/log.c.s
+
 src/common/tls.o: src/common/tls.c.o
 .PHONY : src/common/tls.o
 
@@ -313,6 +340,30 @@ src/server/logic/gamestate.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/logic/gamestate.c.s
 .PHONY : src/server/logic/gamestate.c.s
 
+src/server/security/replay_protection.o: src/server/security/replay_protection.c.o
+.PHONY : src/server/security/replay_protection.o
+
+# target to build an object file
+src/server/security/replay_protection.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/replay_protection.c.o
+.PHONY : src/server/security/replay_protection.c.o
+
+src/server/security/replay_protection.i: src/server/security/replay_protection.c.i
+.PHONY : src/server/security/replay_protection.i
+
+# target to preprocess a source file
+src/server/security/replay_protection.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/replay_protection.c.i
+.PHONY : src/server/security/replay_protection.c.i
+
+src/server/security/replay_protection.s: src/server/security/replay_protection.c.s
+.PHONY : src/server/security/replay_protection.s
+
+# target to generate assembly for a file
+src/server/security/replay_protection.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/replay_protection.c.s
+.PHONY : src/server/security/replay_protection.c.s
+
 src/server/server.o: src/server/server.c.o
 .PHONY : src/server/server.o
 
@@ -356,6 +407,9 @@ help:
 	@echo "... src/client/ui/player.o"
 	@echo "... src/client/ui/player.i"
 	@echo "... src/client/ui/player.s"
+	@echo "... src/common/log.o"
+	@echo "... src/common/log.i"
+	@echo "... src/common/log.s"
 	@echo "... src/common/tls.o"
 	@echo "... src/common/tls.i"
 	@echo "... src/common/tls.s"
@@ -368,6 +422,9 @@ help:
 	@echo "... src/server/logic/gamestate.o"
 	@echo "... src/server/logic/gamestate.i"
 	@echo "... src/server/logic/gamestate.s"
+	@echo "... src/server/security/replay_protection.o"
+	@echo "... src/server/security/replay_protection.i"
+	@echo "... src/server/security/replay_protection.s"
 	@echo "... src/server/server.o"
 	@echo "... src/server/server.i"
 	@echo "... src/server/server.s"

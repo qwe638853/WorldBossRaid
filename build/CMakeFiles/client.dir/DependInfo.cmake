@@ -11,6 +11,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/WorldBossRaid/src/client/client.c" "CMakeFiles/client.dir/src/client/client.c.o" "gcc" "CMakeFiles/client.dir/src/client/client.c.o.d"
   "/home/WorldBossRaid/src/client/ui/boss.c" "CMakeFiles/client.dir/src/client/ui/boss.c.o" "gcc" "CMakeFiles/client.dir/src/client/ui/boss.c.o.d"
   "/home/WorldBossRaid/src/client/ui/player.c" "CMakeFiles/client.dir/src/client/ui/player.c.o" "gcc" "CMakeFiles/client.dir/src/client/ui/player.c.o.d"
+  "/home/WorldBossRaid/src/common/log.c" "CMakeFiles/client.dir/src/common/log.c.o" "gcc" "CMakeFiles/client.dir/src/common/log.c.o.d"
   "/home/WorldBossRaid/src/common/tls.c" "CMakeFiles/client.dir/src/common/tls.c.o" "gcc" "CMakeFiles/client.dir/src/common/tls.c.o.d"
   )
 

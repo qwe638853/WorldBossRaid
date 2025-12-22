@@ -65,7 +65,7 @@ int tls_verify_server_certificate(SSL *ssl);
 // ============================================================================
 
 // 顯示 SSL 連線資訊（加密套件等）
-void tls_print_connection_info(SSL *ssl, const char *prefix);
+void tls_print_connection_info(SSL *ssl);
 
 #endif
 

@@ -125,10 +125,24 @@ CMakeFiles/server.dir/src/server/logic/dice.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/logic/dice.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/logic/dice.c -o CMakeFiles/server.dir/src/server/logic/dice.c.s
 
+CMakeFiles/server.dir/src/server/security/replay_protection.c.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/server/security/replay_protection.c.o: /home/WorldBossRaid/src/server/security/replay_protection.c
+CMakeFiles/server.dir/src/server/security/replay_protection.c.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/server.dir/src/server/security/replay_protection.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/security/replay_protection.c.o -MF CMakeFiles/server.dir/src/server/security/replay_protection.c.o.d -o CMakeFiles/server.dir/src/server/security/replay_protection.c.o -c /home/WorldBossRaid/src/server/security/replay_protection.c
+
+CMakeFiles/server.dir/src/server/security/replay_protection.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/security/replay_protection.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/server/security/replay_protection.c > CMakeFiles/server.dir/src/server/security/replay_protection.c.i
+
+CMakeFiles/server.dir/src/server/security/replay_protection.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/security/replay_protection.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/security/replay_protection.c -o CMakeFiles/server.dir/src/server/security/replay_protection.c.s
+
 CMakeFiles/server.dir/src/common/tls.c.o: CMakeFiles/server.dir/flags.make
 CMakeFiles/server.dir/src/common/tls.c.o: /home/WorldBossRaid/src/common/tls.c
 CMakeFiles/server.dir/src/common/tls.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/server.dir/src/common/tls.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/server.dir/src/common/tls.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/common/tls.c.o -MF CMakeFiles/server.dir/src/common/tls.c.o.d -o CMakeFiles/server.dir/src/common/tls.c.o -c /home/WorldBossRaid/src/common/tls.c
 
 CMakeFiles/server.dir/src/common/tls.c.i: cmake_force
@@ -139,13 +153,29 @@ CMakeFiles/server.dir/src/common/tls.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/common/tls.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/common/tls.c -o CMakeFiles/server.dir/src/common/tls.c.s
 
+CMakeFiles/server.dir/src/common/log.c.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/common/log.c.o: /home/WorldBossRaid/src/common/log.c
+CMakeFiles/server.dir/src/common/log.c.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/server.dir/src/common/log.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/common/log.c.o -MF CMakeFiles/server.dir/src/common/log.c.o.d -o CMakeFiles/server.dir/src/common/log.c.o -c /home/WorldBossRaid/src/common/log.c
+
+CMakeFiles/server.dir/src/common/log.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/common/log.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/common/log.c > CMakeFiles/server.dir/src/common/log.c.i
+
+CMakeFiles/server.dir/src/common/log.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/common/log.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/common/log.c -o CMakeFiles/server.dir/src/common/log.c.s
+
 # Object files for target server
 server_OBJECTS = \
 "CMakeFiles/server.dir/src/server/server.c.o" \
 "CMakeFiles/server.dir/src/server/logic/client_handler.c.o" \
 "CMakeFiles/server.dir/src/server/logic/gamestate.c.o" \
 "CMakeFiles/server.dir/src/server/logic/dice.c.o" \
-"CMakeFiles/server.dir/src/common/tls.c.o"
+"CMakeFiles/server.dir/src/server/security/replay_protection.c.o" \
+"CMakeFiles/server.dir/src/common/tls.c.o" \
+"CMakeFiles/server.dir/src/common/log.c.o"
 
 # External object files for target server
 server_EXTERNAL_OBJECTS =
@@ -154,12 +184,14 @@ server: CMakeFiles/server.dir/src/server/server.c.o
 server: CMakeFiles/server.dir/src/server/logic/client_handler.c.o
 server: CMakeFiles/server.dir/src/server/logic/gamestate.c.o
 server: CMakeFiles/server.dir/src/server/logic/dice.c.o
+server: CMakeFiles/server.dir/src/server/security/replay_protection.c.o
 server: CMakeFiles/server.dir/src/common/tls.c.o
+server: CMakeFiles/server.dir/src/common/log.c.o
 server: CMakeFiles/server.dir/build.make
 server: /usr/lib/x86_64-linux-gnu/libssl.so
 server: /usr/lib/x86_64-linux-gnu/libcrypto.so
 server: CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
