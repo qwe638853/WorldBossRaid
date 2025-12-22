@@ -1,9 +1,8 @@
 CMakeFiles/server.dir/src/server/logic/gamestate.c.o: \
- /home/LINEX/WorldBossRaid/src/server/logic/gamestate.c \
+ /home/WorldBossRaid/src/server/logic/gamestate.c \
  /usr/include/stdc-predef.h \
- /home/LINEX/WorldBossRaid/src/server/logic/gamestate.h \
- /usr/include/pthread.h /usr/include/features.h \
- /usr/include/features-time64.h \
+ /home/WorldBossRaid/src/server/logic/gamestate.h /usr/include/pthread.h \
+ /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/bits/timesize.h \
  /usr/include/x86_64-linux-gnu/sys/cdefs.h \

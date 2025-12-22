@@ -25,7 +25,7 @@ set(SERVER_SOURCES
     src/server/logic/client_handler.c
     src/server/logic/gamestate.c
     src/server/logic/dice.c
-    src/server/security/tls.c
+    src/common/tls.c
 )
 
 add_executable(server ${SERVER_SOURCES})
@@ -73,8 +73,14 @@ if(NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
     endif()
 endif()
 
+# 統一設定 OPENSSL_FOUND 變數（用於後續判斷）
+if(OpenSSL_FOUND)
+    set(OPENSSL_FOUND TRUE)
+endif()
+
 # 如果還是找不到，給出明確的錯誤訊息
-if(NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
+# 檢查 OpenSSL_FOUND (CMake) 或 OPENSSL_FOUND (pkg-config/手動)
+if(NOT OpenSSL_FOUND)
     message(FATAL_ERROR 
         "OpenSSL not found!\n"
         "Please install OpenSSL development package:\n"
@@ -108,11 +114,27 @@ set(CLIENT_SOURCES
     src/client/client.c
     src/client/ui/player.c
     src/client/ui/boss.c
+    src/common/tls.c
 )
 
 add_executable(client ${CLIENT_SOURCES})
 
-# Client 目前沒有特殊依賴，如果之後需要 ncurses 可以加入：
+# Client 也需要 OpenSSL（因為使用 TLS）
+if(OpenSSL_FOUND)
+    # 使用現代 CMake 目標
+    target_link_libraries(client
+        OpenSSL::SSL
+        OpenSSL::Crypto
+    )
+else()
+    # 使用傳統方式
+    target_include_directories(client PRIVATE ${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(client
+        ${OPENSSL_LIBRARIES}
+    )
+endif()
+
+# 如果之後需要 ncurses 可以加入：
 # find_package(Curses REQUIRED)
 # target_link_libraries(client ${CURSES_LIBRARIES})
 

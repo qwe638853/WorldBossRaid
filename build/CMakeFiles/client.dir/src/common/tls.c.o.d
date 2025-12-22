@@ -1,8 +1,7 @@
-CMakeFiles/server.dir/src/server/security/tls.c.o: \
- /home/LINEX/WorldBossRaid/src/server/security/tls.c \
- /usr/include/stdc-predef.h \
- /home/LINEX/WorldBossRaid/src/server/security/tls.h \
- /usr/include/openssl/ssl.h /usr/include/openssl/macros.h \
+CMakeFiles/client.dir/src/common/tls.c.o: \
+ /home/WorldBossRaid/src/common/tls.c /usr/include/stdc-predef.h \
+ /home/WorldBossRaid/src/common/tls.h /usr/include/openssl/ssl.h \
+ /usr/include/openssl/macros.h \
  /usr/include/x86_64-linux-gnu/openssl/opensslconf.h \
  /usr/include/x86_64-linux-gnu/openssl/configuration.h \
  /usr/include/openssl/opensslv.h /usr/include/openssl/e_os2.h \

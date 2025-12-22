@@ -1,9 +1,8 @@
 CMakeFiles/server.dir/src/server/logic/dice.c.o: \
- /home/LINEX/WorldBossRaid/src/server/logic/dice.c \
- /usr/include/stdc-predef.h \
- /home/LINEX/WorldBossRaid/src/server/logic/dice.h \
+ /home/WorldBossRaid/src/server/logic/dice.c /usr/include/stdc-predef.h \
+ /home/WorldBossRaid/src/server/logic/dice.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdbool.h \
- /home/LINEX/WorldBossRaid/src/server/logic/../../common/protocol.h \
+ /home/WorldBossRaid/src/server/logic/../../common/protocol.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -20,9 +19,8 @@ CMakeFiles/server.dir/src/server/logic/dice.c.o: \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/LINEX/WorldBossRaid/src/server/logic/gamestate.h \
- /usr/include/pthread.h /usr/include/sched.h \
- /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
+ /home/WorldBossRaid/src/server/logic/gamestate.h /usr/include/pthread.h \
+ /usr/include/sched.h /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
  /usr/include/x86_64-linux-gnu/bits/endian.h \
