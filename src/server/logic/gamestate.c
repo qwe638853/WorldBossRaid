@@ -1,10 +1,12 @@
 /* src/server/logic/gamestate.c */
 #include "gamestate.h"
+#include "../../common/log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h> // 用於 mmap
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 // 內部全域變數 (Singleton pattern)
 static GameSharedData *shm = NULL;
@@ -18,7 +20,7 @@ void gamestate_init() {
                MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
     if (shm == MAP_FAILED) {
-        perror("[GameState] mmap failed");
+        LOG_ERROR("Failed to create shared memory: %s", strerror(errno));
         exit(1);
     }
 
@@ -28,7 +30,7 @@ void gamestate_init() {
     pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
     
     if (pthread_mutex_init(&shm->lock, &attr) != 0) {
-        perror("[GameState] Mutex init failed");
+        LOG_ERROR("Failed to initialize mutex: %s", strerror(errno));
         exit(1);
     }
     pthread_mutexattr_destroy(&attr);
@@ -45,7 +47,7 @@ void gamestate_init() {
     // 這一步很重要，確保伺服器剛啟動時沒有髒數據
     memset(shm->players, 0, sizeof(shm->players));
 
-    printf("[GameState] Shared Memory Initialized. Boss 1 Ready.\n");
+    LOG_INFO("Shared Memory Initialized. Boss 1 Ready (HP: %d)", BOSS_1_MAX_HP);
 }
 
 void gamestate_destroy() {
@@ -53,7 +55,7 @@ void gamestate_destroy() {
     pthread_mutex_destroy(&shm->lock);
     munmap(shm, sizeof(GameSharedData));
     shm = NULL;
-    printf("[GameState] Resources Cleaned.\n");
+    LOG_DEBUG("GameState resources cleaned");
 }
 
 // --- 玩家管理 ---
@@ -117,7 +119,7 @@ bool gamestate_apply_damage(int damage, const char* attacker_name) {
             if (attacker_name) {
                 strncpy(shm->last_killer, attacker_name, 31);
             }
-            printf("[GameState] Boss Killed by %s!\n", attacker_name ? attacker_name : "Unknown");
+            LOG_INFO("Boss Killed by %s!", attacker_name ? attacker_name : "Unknown");
         }
     }
 
@@ -134,11 +136,11 @@ void gamestate_spawn_next_boss() {
         shm->stage = BOSS_STAGE_2;
         shm->max_hp = BOSS_2_MAX_HP;
         shm->current_hp = BOSS_2_MAX_HP;
-        printf("[GameState] Boss 2 Spawned!\n");
+        LOG_INFO("Boss 2 Spawned! (HP: %d)", BOSS_2_MAX_HP);
     } else {
         shm->stage = BOSS_STAGE_DEAD;
         shm->current_hp = 0;
-        printf("[GameState] All Bosses Defeated.\n");
+        LOG_INFO("All Bosses Defeated. Game Complete!");
     }
     
     // 解除重生鎖定，清空擊殺者
