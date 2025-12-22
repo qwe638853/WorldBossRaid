@@ -51,12 +51,15 @@ void game_process_attack(int player_dice, const char* player_name,
         // 設定回傳狀態
         result_out->is_win = true;
         result_out->is_crit = true;
-        result_out->is_lucky_kill = true; // [更新] 告訴 UI 這是天選之人
+        result_out->is_lucky_kill = true; // 告訴 UI 這是天選之人
         result_out->dmg_dealt = INSTANT_KILL_DAMAGE;
         
         // 執行扣血
         bool killed = gamestate_apply_damage(result_out->dmg_dealt, player_name);
-        if (killed) result_out->boss_just_died = true;
+        if (killed) {
+            result_out->boss_just_died = true;
+            gamestate_spawn_next_boss(); // 立刻切換到下一隻 Boss 或結束遊戲
+        }
 
     } 
     else if (player_dice > boss_dice) {
@@ -85,7 +88,10 @@ void game_process_attack(int player_dice, const char* player_name,
 
         // 執行扣血
         bool killed = gamestate_apply_damage(result_out->dmg_dealt, player_name);
-        if (killed) result_out->boss_just_died = true;
+        if (killed) {
+            result_out->boss_just_died = true;
+            gamestate_spawn_next_boss(); // 第一隻死 → 第二隻出生；第二隻死 → 遊戲結束
+        }
 
     } 
     else {
