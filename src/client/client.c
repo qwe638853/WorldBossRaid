@@ -1,12 +1,8 @@
-// client.c - Simple interactive client for World Boss Raid
+// client.c - Client for World Boss Raid
 //
-// 目標：給你一個「最小可懂版」的 client：
-// - 建立 TCP 連線到 server
-// - 送出 OP_JOIN (帶玩家名稱)
-// - 讓你按鍵送出 OP_ATTACK
-// - 收回 OP_GAME_STATE，印出 Boss 血量
-//
-// 先不用 UI / 多執行緒，讓你清楚看到 Client 在做什麼、封包怎麼組、怎麼跟 server 溝通。
+// 提供兩種模式：
+// 1. 一般互動模式（預設）：單一玩家，透過 TLS 連線手動攻擊世界王。
+// 2. 壓力測試模式（--stress）：使用多個 thread 同時連線並自動攻擊，用來測試 Server 承載量。
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +10,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <pthread.h>
 
 #include "common/protocol.h"
 #include "common/tls.h"
@@ -26,6 +23,16 @@
 
 // 簡單的全域序號計數器（真的要用時可以做成 thread-safe）
 static uint32_t g_seq_num = 1;
+
+// 壓力測試相關常數
+#define STRESS_WORKER_COUNT        100   // 同時開多少條連線
+#define STRESS_ATTACKS_PER_WORKER   20   // 每條連線攻擊幾次
+
+// 壓力測試用的 thread 參數
+typedef struct {
+    SSL_CTX *ctx;       // 共用的 TLS context（thread-safe 用來建立 SSL 物件）
+    int      worker_id; // 第幾號機器人
+} StressWorkerArgs;
 
 // 計算封包 checksum：這裡用「所有位元組的簡單總和」
 static uint16_t calc_checksum(const uint8_t *data, size_t len) {
@@ -232,7 +239,11 @@ static int send_attack_and_show_state(SSL *ssl) {
     return 0;
 }
 
-int main(void) {
+// ---------------------------------------------------------------------------
+// 一般互動模式：單一玩家 + 單執行緒
+// ---------------------------------------------------------------------------
+
+static int run_interactive_mode(void) {
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     int sockfd = -1;
@@ -327,4 +338,120 @@ cleanup:
     return (player_id >= 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+// ---------------------------------------------------------------------------
+// 壓力測試模式：用多個 thread 同時攻擊 Server
+// ---------------------------------------------------------------------------
 
+static void *stress_worker_thread(void *arg) {
+    StressWorkerArgs *w = (StressWorkerArgs *)arg;
+    SSL *ssl = NULL;
+    int sockfd = -1;
+    int player_id = -1;
+    char username[MAX_PLAYER_NAME];
+
+    // 每個 worker 自己建立 TCP 連線
+    sockfd = connect_to_server();
+    if (sockfd < 0) {
+        goto cleanup;
+    }
+
+    // 使用共用的 ctx 做 TLS 握手
+    ssl = tls_client_handshake(w->ctx, sockfd);
+    if (!ssl) {
+        fprintf(stderr, "[Stress %d] TLS handshake failed\n", w->worker_id);
+        goto cleanup;
+    }
+
+    // 驗證伺服器證書（如果有提供 CA）
+    if (CA_CERT_FILE != NULL) {
+        if (tls_verify_server_certificate(ssl) != 0) {
+            fprintf(stderr, "[Stress %d] Server certificate verification failed\n", w->worker_id);
+            goto cleanup;
+        }
+    }
+
+    // 組一個機器人名稱
+    snprintf(username, sizeof(username), "bot_%03d", w->worker_id);
+
+    // JOIN
+    player_id = send_join_and_wait_resp(ssl, username);
+    if (player_id < 0) {
+        fprintf(stderr, "[Stress %d] Join failed\n", w->worker_id);
+        goto cleanup;
+    }
+
+    // 固定次數的攻擊迴圈
+    for (int i = 0; i < STRESS_ATTACKS_PER_WORKER; ++i) {
+        if (send_attack_and_show_state(ssl) < 0) {
+            fprintf(stderr, "[Stress %d] Attack failed at #%d\n", w->worker_id, i);
+            break;
+        }
+        // 稍微休息一下，避免所有連線同時瞬間打完
+        usleep(100 * 1000); // 100ms
+    }
+
+cleanup:
+    if (ssl) {
+        tls_shutdown(ssl);
+        tls_free_ssl(ssl);
+    }
+    if (sockfd >= 0) {
+        close(sockfd);
+    }
+
+    return NULL;
+}
+
+static int run_stress_mode(void) {
+    SSL_CTX *ctx = NULL;
+    pthread_t threads[STRESS_WORKER_COUNT];
+    StressWorkerArgs args[STRESS_WORKER_COUNT];
+
+    printf("[Stress] Starting stress test with %d workers, %d attacks each...\n",
+           STRESS_WORKER_COUNT, STRESS_ATTACKS_PER_WORKER);
+
+    tls_init_openssl();
+    ctx = tls_create_client_context(CA_CERT_FILE);
+    if (!ctx) {
+        fprintf(stderr, "[Stress] Failed to create TLS context\n");
+        tls_cleanup_openssl();
+        return EXIT_FAILURE;
+    }
+
+    // 建立所有 worker thread
+    for (int i = 0; i < STRESS_WORKER_COUNT; ++i) {
+        args[i].ctx = ctx;
+        args[i].worker_id = i;
+        if (pthread_create(&threads[i], NULL, stress_worker_thread, &args[i]) != 0) {
+            perror("[Stress] pthread_create");
+            threads[i] = 0; // 標記這個 thread 沒有成功建立
+        }
+    }
+
+    // 等待所有 worker 結束
+    for (int i = 0; i < STRESS_WORKER_COUNT; ++i) {
+        if (threads[i]) {
+            pthread_join(threads[i], NULL);
+        }
+    }
+
+    tls_cleanup_context(ctx);
+    tls_cleanup_openssl();
+
+    printf("[Stress] All workers finished.\n");
+    return EXIT_SUCCESS;
+}
+
+// ---------------------------------------------------------------------------
+// 程式進入點：依據參數決定模式
+// ---------------------------------------------------------------------------
+
+int main(int argc, char **argv) {
+    if (argc > 1 && strcmp(argv[1], "--stress") == 0) {
+        // 壓力測試模式  ./client --stress
+        return run_stress_mode();
+    }
+
+    // 預設：一般互動模式
+    return run_interactive_mode();
+}
