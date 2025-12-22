@@ -122,18 +122,20 @@ set(CLIENT_SOURCES
 
 add_executable(client ${CLIENT_SOURCES})
 
-# Client 也需要 OpenSSL（因為使用 TLS）
+# Client 也需要 OpenSSL 和 pthread（因為使用 TLS + threads）
 if(OpenSSL_FOUND)
     # 使用現代 CMake 目標
     target_link_libraries(client
         OpenSSL::SSL
         OpenSSL::Crypto
+        Threads::Threads
     )
 else()
     # 使用傳統方式
     target_include_directories(client PRIVATE ${OPENSSL_INCLUDE_DIR})
     target_link_libraries(client
         ${OPENSSL_LIBRARIES}
+        Threads::Threads
     )
 endif()
 

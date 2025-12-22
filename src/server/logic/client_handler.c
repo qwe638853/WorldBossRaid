@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <openssl/ssl.h>
+#include <string.h>
+#include <stdint.h>
+#include <time.h>
 #include "common/protocol.h"
 #include "common/tls.h"
 #include "common/log.h"
@@ -20,26 +23,30 @@
 //    - 用 gamestate 改 Boss HP、讀最新狀態
 //    - 回 OP_GAME_STATE（以及各種通知）
 
+// 簡單的 checksum：對 payload 所有位元組做加總（和 client 一致）
+static uint16_t calc_checksum(const uint8_t *data, size_t len);
 
 // 從 SSL 連線收一個 GamePacket（使用 SSL_read 進行加密接收）
 // rp: Replay Protection 狀態（用於驗證 seq_num，可為 NULL）
 static int recv_packet(SSL *ssl, GamePacket *pkt, ReplayProtection *rp);
 
 // 對 client 回傳一個 GamePacket（使用 SSL_write 進行加密發送）
-static int send_packet(SSL *ssl, GamePacket *pkt);
+// payload_size: 實際 payload 長度
+static int send_packet(SSL *ssl, GamePacket *pkt, size_t payload_size);
 
 // 處理第一包 OP_JOIN：讀 username、分配 player_id、回 OP_JOIN_RESP
-static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id);
+static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id, char *out_username);
 
 // 處理 OP_ATTACK：擲骰子、改 Boss HP、回最新 OP_GAME_STATE
-static int handle_attack(SSL *ssl, GamePacket *pkt_in, int player_id);
+static int handle_attack(SSL *ssl, const char *player_name);
 
 // handle client connection in worker process
 // 接收 SSL* 物件，內部自動使用 SSL_read/SSL_write 進行加密通訊
 void handle_client(SSL *ssl) {
     GamePacket packet;
     int player_id = -1;
-    
+    char username[MAX_PLAYER_NAME] = {0};
+
     // 初始化 Replay Protection（防止重放攻擊）
     ReplayProtection rp;
     replay_protection_init(&rp);
@@ -51,15 +58,63 @@ void handle_client(SSL *ssl) {
     }
     LOG_DEBUG("Received first packet: opcode=0x%02X", packet.header.opcode);
 
-    // TODO: Implement packet receiving and processing logic
-    // 1. ✅ 已接收第一包，檢查是否為 OP_JOIN
-    // 2. 呼叫 handle_join() 分配 player_id 並回 OP_JOIN_RESP
-    // 3. 進入 while 迴圈：
-    //    - recv_packet() 收封包
-    //    - 驗證 seq_num（replay protection，已在 recv_packet 內完成）
-    //    - 依 pkt.header.opcode 呼叫對應處理函式（例如 handle_attack()）
-    //    - 視情況回傳 OP_GAME_STATE 或其他通知
-    
+    // 必須先 JOIN 才能進入遊戲
+    if (packet.header.opcode != OP_JOIN) {
+        LOG_WARN("First packet is not OP_JOIN, opcode=0x%02X", packet.header.opcode);
+        goto cleanup;
+    }
+
+    // 處理加入：分配 player_id、紀錄名稱並回傳 OP_JOIN_RESP
+    if (handle_join(ssl, &packet, &player_id, username) < 0) {
+        LOG_ERROR("handle_join failed");
+        goto cleanup;
+    }
+
+    // 進入主迴圈：處理 ATTACK / HEARTBEAT / LEAVE
+    while (1) {
+        if (recv_packet(ssl, &packet, &rp) < 0) {
+            LOG_INFO("Client disconnected or recv error, closing connection");
+            break;
+        }
+
+        switch (packet.header.opcode) {
+            case OP_ATTACK:
+                if (handle_attack(ssl, username) < 0) {
+                    LOG_ERROR("handle_attack failed");
+                    goto cleanup;
+                }
+                break;
+
+            case OP_HEARTBEAT: {
+                GameSharedData snap;
+                Payload_GameState state;
+                gamestate_get_snapshot(&snap);
+                state.boss_hp = snap.current_hp;
+                state.max_hp = snap.max_hp;
+                state.online_count = snap.online_count;
+
+                GamePacket resp;
+                memset(&resp, 0, sizeof(resp));
+                resp.header.opcode = OP_GAME_STATE;
+                resp.body.game_state = state;
+
+                if (send_packet(ssl, &resp, sizeof(Payload_GameState)) < 0) {
+                    LOG_ERROR("Failed to send GAME_STATE for heartbeat");
+                    goto cleanup;
+                }
+                break;
+            }
+
+            case OP_LEAVE:
+                LOG_INFO("Client requested leave");
+                goto cleanup;
+
+            default:
+                LOG_WARN("Unknown opcode from client: 0x%02X", packet.header.opcode);
+                break;
+        }
+    }
+
 cleanup:
     // 清理 SSL 連線（會自動關閉底層 socket）
     if (ssl) {
@@ -71,11 +126,6 @@ cleanup:
     }
     exit(0);
 }
-
-// ================================
-// 以下是預留的函式「空殼」，只宣告名稱，不寫邏輯
-// 之後你或隊友可以在這裡慢慢把 TODO 補滿
-// ================================
 
 // SSL 包裝層：使用 SSL_read 取代 recv()
 // rp: Replay Protection 狀態（用於驗證 seq_num）
@@ -136,37 +186,86 @@ static int recv_packet(SSL *ssl, GamePacket *pkt, ReplayProtection *rp) {
 }
 
 // SSL 包裝層：使用 SSL_write 取代 send()
-static int send_packet(SSL *ssl, GamePacket *pkt) {
-    // TODO: 實作將 GamePacket 送回 client
-    // 建議流程：根據 pkt->header.length 用 SSL_write() 送出全部 bytes
-    // 使用 SSL_write() 取代原本的 send()
-    // 範例：SSL_write(ssl, buffer, size)
-    (void)ssl;
-    (void)pkt;
-    return -1;
+static int send_packet(SSL *ssl, GamePacket *pkt, size_t payload_size) {
+    if (!ssl || !pkt) return -1;
+
+    pkt->header.length = (uint32_t)(sizeof(PacketHeader) + payload_size);
+    pkt->header.checksum = calc_checksum((const uint8_t *)&pkt->body.raw[0],
+                                         payload_size);
+
+    size_t total = pkt->header.length;
+    size_t sent_total = 0;
+
+    while (sent_total < total) {
+        int n = SSL_write(ssl, ((uint8_t *)pkt) + sent_total, total - sent_total);
+        if (n <= 0) {
+            int err = SSL_get_error(ssl, n);
+            LOG_ERROR("SSL_write error: %d", err);
+            ERR_print_errors_fp(stderr);
+            return -1;
+        }
+        sent_total += (size_t)n;
+    }
+    return 0;
 }
 
-// 內部邏輯函數：不需要修改，因為它們只呼叫 send_packet/recv_packet
-static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id) {
-    // TODO: 實作
-    // 1. 從 pkt_in->body.join 讀出 username
-    // 2. 呼叫 game_player_join() 取得 player_id
-    // 3. 組一個 OP_JOIN_RESP 封包，呼叫 send_packet() 回給 client
-    (void)ssl;
-    (void)pkt_in;
-    (void)out_player_id;
-    return -1;
+static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id, char *out_username) {
+    if (!ssl || !pkt_in || !out_player_id || !out_username) return -1;
+
+    const char *name = pkt_in->body.join.username;
+    strncpy(out_username, name, MAX_PLAYER_NAME - 1);
+    out_username[MAX_PLAYER_NAME - 1] = '\0';
+
+    int online = gamestate_player_join();
+    int player_id = online;
+    *out_player_id = player_id;
+
+    LOG_INFO("Player joined: name=%s, id=%d, online=%d", out_username, player_id, online);
+
+    GamePacket resp;
+    memset(&resp, 0, sizeof(resp));
+    resp.header.opcode = OP_JOIN_RESP;
+    resp.body.join_resp.player_id = player_id;
+    resp.body.join_resp.status = 1;
+
+    if (send_packet(ssl, &resp, sizeof(Payload_JoinResp)) < 0) {
+        LOG_ERROR("Failed to send OP_JOIN_RESP");
+        return -1;
+    }
+
+    return 0;
 }
 
-// 內部邏輯函數：不需要修改，因為它們只呼叫 send_packet/recv_packet
-static int handle_attack(SSL *ssl, GamePacket *pkt_in, int player_id) {
-    // TODO: 實作：
-    // 1. 利用 dice_* 函式做「拼點對決」
-    // 2. 呼叫 game_attack_boss() 改 Boss 狀態
-    // 3. 組一個 OP_GAME_STATE 封包，呼叫 send_packet() 回給 client
-    (void)ssl;
-    (void)pkt_in;
-    (void)player_id;
-    return -1;
+static int handle_attack(SSL *ssl, const char *player_name) {
+    if (!ssl || !player_name) return -1;
+
+    int player_dice = (rand() % 6) + 1;
+
+    AttackResult result;
+    Payload_GameState state;
+    game_process_attack(player_dice, player_name, &result, &state);
+
+    LOG_DEBUG("Attack: player=%s dice=%d boss_dice=%d dmg=%d taken=%d",
+              player_name, player_dice, result.boss_dice,
+              result.dmg_dealt, result.dmg_taken);
+
+    GamePacket resp;
+    memset(&resp, 0, sizeof(resp));
+    resp.header.opcode = OP_GAME_STATE;
+    resp.body.game_state = state;
+
+    if (send_packet(ssl, &resp, sizeof(Payload_GameState)) < 0) {
+        LOG_ERROR("Failed to send OP_GAME_STATE");
+        return -1;
+    }
+
+    return 0;
 }
-//testtest
+
+static uint16_t calc_checksum(const uint8_t *data, size_t len) {
+    uint32_t sum = 0;
+    for (size_t i = 0; i < len; ++i) {
+        sum += data[i];
+    }
+    return (uint16_t)(sum & 0xFFFF);
+}
