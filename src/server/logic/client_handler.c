@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <openssl/ssl.h>
-#include "../../common/protocol.h"
+#include "common/protocol.h"
+#include "common/tls.h"
 #include "gamestate.h"
 #include "dice.h"
 
@@ -46,8 +47,8 @@ void handle_client(SSL *ssl) {
     //    - 視情況回傳 OP_GAME_STATE 或其他通知
     
     // 清理 SSL 連線（會自動關閉底層 socket）
-    SSL_shutdown(ssl);
-    SSL_free(ssl);
+    tls_shutdown(ssl);
+    tls_free_ssl(ssl);
     if (player_id >= 0) {
         gamestate_player_leave();
     }

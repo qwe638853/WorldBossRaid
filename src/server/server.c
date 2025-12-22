@@ -10,7 +10,7 @@
 #include "logic/gamestate.h"
 #include "logic/dice.h"
 #include "logic/client_handler.h"
-#include "security/tls.h"
+#include "common/tls.h"
 
 #define PORT 8888
 #define BUFFER_SIZE 1024
@@ -34,10 +34,10 @@ int main(){
     struct sockaddr_in address;
     struct sigaction sa;
 
-    init_openssl();
-    SSL_CTX *ctx = create_tls_context("../src/server/ca/server.crt", "../src/server/ca/server.key");
+    tls_init_openssl();
+    SSL_CTX *ctx = tls_create_server_context("../certs/server/server.crt", "../certs/server/server.key");
     if (!ctx) {
-        perror("Error creating SSL context");
+        fprintf(stderr, "Error creating SSL context\n");
         exit(EXIT_FAILURE);
     }
 
@@ -117,7 +117,7 @@ int main(){
             close(server_fd); // Close server socket in child
 
             // 執行 TLS 握手，將普通 socket 升級為 SSL socket
-            SSL *ssl = perform_tls_handshake(ctx, new_socket);
+            SSL *ssl = tls_server_handshake(ctx, new_socket);
             if (!ssl) {
                 fprintf(stderr, "Error performing TLS handshake\n");
                 close(new_socket);

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/LINEX/WorldBossRaid
+CMAKE_SOURCE_DIR = /home/WorldBossRaid
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/LINEX/WorldBossRaid/build
+CMAKE_BINARY_DIR = /home/WorldBossRaid/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/client.dir/depend.make
@@ -70,52 +70,67 @@ include CMakeFiles/client.dir/progress.make
 include CMakeFiles/client.dir/flags.make
 
 CMakeFiles/client.dir/src/client/client.c.o: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/src/client/client.c.o: /home/LINEX/WorldBossRaid/src/client/client.c
+CMakeFiles/client.dir/src/client/client.c.o: /home/WorldBossRaid/src/client/client.c
 CMakeFiles/client.dir/src/client/client.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/client.dir/src/client/client.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/client.c.o -MF CMakeFiles/client.dir/src/client/client.c.o.d -o CMakeFiles/client.dir/src/client/client.c.o -c /home/LINEX/WorldBossRaid/src/client/client.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/client.dir/src/client/client.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/client.c.o -MF CMakeFiles/client.dir/src/client/client.c.o.d -o CMakeFiles/client.dir/src/client/client.c.o -c /home/WorldBossRaid/src/client/client.c
 
 CMakeFiles/client.dir/src/client/client.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/src/client/client.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/client/client.c > CMakeFiles/client.dir/src/client/client.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/client/client.c > CMakeFiles/client.dir/src/client/client.c.i
 
 CMakeFiles/client.dir/src/client/client.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/client.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/client/client.c -o CMakeFiles/client.dir/src/client/client.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/client/client.c -o CMakeFiles/client.dir/src/client/client.c.s
 
 CMakeFiles/client.dir/src/client/ui/player.c.o: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/src/client/ui/player.c.o: /home/LINEX/WorldBossRaid/src/client/ui/player.c
+CMakeFiles/client.dir/src/client/ui/player.c.o: /home/WorldBossRaid/src/client/ui/player.c
 CMakeFiles/client.dir/src/client/ui/player.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/src/client/ui/player.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/player.c.o -MF CMakeFiles/client.dir/src/client/ui/player.c.o.d -o CMakeFiles/client.dir/src/client/ui/player.c.o -c /home/LINEX/WorldBossRaid/src/client/ui/player.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/src/client/ui/player.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/player.c.o -MF CMakeFiles/client.dir/src/client/ui/player.c.o.d -o CMakeFiles/client.dir/src/client/ui/player.c.o -c /home/WorldBossRaid/src/client/ui/player.c
 
 CMakeFiles/client.dir/src/client/ui/player.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/player.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/client/ui/player.c > CMakeFiles/client.dir/src/client/ui/player.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/client/ui/player.c > CMakeFiles/client.dir/src/client/ui/player.c.i
 
 CMakeFiles/client.dir/src/client/ui/player.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/player.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/client/ui/player.c -o CMakeFiles/client.dir/src/client/ui/player.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/client/ui/player.c -o CMakeFiles/client.dir/src/client/ui/player.c.s
 
 CMakeFiles/client.dir/src/client/ui/boss.c.o: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/src/client/ui/boss.c.o: /home/LINEX/WorldBossRaid/src/client/ui/boss.c
+CMakeFiles/client.dir/src/client/ui/boss.c.o: /home/WorldBossRaid/src/client/ui/boss.c
 CMakeFiles/client.dir/src/client/ui/boss.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/src/client/ui/boss.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/boss.c.o -MF CMakeFiles/client.dir/src/client/ui/boss.c.o.d -o CMakeFiles/client.dir/src/client/ui/boss.c.o -c /home/LINEX/WorldBossRaid/src/client/ui/boss.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/src/client/ui/boss.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/boss.c.o -MF CMakeFiles/client.dir/src/client/ui/boss.c.o.d -o CMakeFiles/client.dir/src/client/ui/boss.c.o -c /home/WorldBossRaid/src/client/ui/boss.c
 
 CMakeFiles/client.dir/src/client/ui/boss.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/boss.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/client/ui/boss.c > CMakeFiles/client.dir/src/client/ui/boss.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/client/ui/boss.c > CMakeFiles/client.dir/src/client/ui/boss.c.i
 
 CMakeFiles/client.dir/src/client/ui/boss.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/boss.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/client/ui/boss.c -o CMakeFiles/client.dir/src/client/ui/boss.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/client/ui/boss.c -o CMakeFiles/client.dir/src/client/ui/boss.c.s
+
+CMakeFiles/client.dir/src/common/tls.c.o: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/src/common/tls.c.o: /home/WorldBossRaid/src/common/tls.c
+CMakeFiles/client.dir/src/common/tls.c.o: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/client.dir/src/common/tls.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/common/tls.c.o -MF CMakeFiles/client.dir/src/common/tls.c.o.d -o CMakeFiles/client.dir/src/common/tls.c.o -c /home/WorldBossRaid/src/common/tls.c
+
+CMakeFiles/client.dir/src/common/tls.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/client.dir/src/common/tls.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/common/tls.c > CMakeFiles/client.dir/src/common/tls.c.i
+
+CMakeFiles/client.dir/src/common/tls.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/client.dir/src/common/tls.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/common/tls.c -o CMakeFiles/client.dir/src/common/tls.c.s
 
 # Object files for target client
 client_OBJECTS = \
 "CMakeFiles/client.dir/src/client/client.c.o" \
 "CMakeFiles/client.dir/src/client/ui/player.c.o" \
-"CMakeFiles/client.dir/src/client/ui/boss.c.o"
+"CMakeFiles/client.dir/src/client/ui/boss.c.o" \
+"CMakeFiles/client.dir/src/common/tls.c.o"
 
 # External object files for target client
 client_EXTERNAL_OBJECTS =
@@ -123,9 +138,12 @@ client_EXTERNAL_OBJECTS =
 client: CMakeFiles/client.dir/src/client/client.c.o
 client: CMakeFiles/client.dir/src/client/ui/player.c.o
 client: CMakeFiles/client.dir/src/client/ui/boss.c.o
+client: CMakeFiles/client.dir/src/common/tls.c.o
 client: CMakeFiles/client.dir/build.make
+client: /usr/lib/x86_64-linux-gnu/libssl.so
+client: /usr/lib/x86_64-linux-gnu/libcrypto.so
 client: CMakeFiles/client.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable client"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable client"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/client.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -137,6 +155,6 @@ CMakeFiles/client.dir/clean:
 .PHONY : CMakeFiles/client.dir/clean
 
 CMakeFiles/client.dir/depend:
-	cd /home/LINEX/WorldBossRaid/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/LINEX/WorldBossRaid /home/LINEX/WorldBossRaid /home/LINEX/WorldBossRaid/build /home/LINEX/WorldBossRaid/build /home/LINEX/WorldBossRaid/build/CMakeFiles/client.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/WorldBossRaid/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/WorldBossRaid /home/WorldBossRaid /home/WorldBossRaid/build /home/WorldBossRaid/build /home/WorldBossRaid/build/CMakeFiles/client.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/client.dir/depend
 

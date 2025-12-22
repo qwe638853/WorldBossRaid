@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/LINEX/WorldBossRaid
+CMAKE_SOURCE_DIR = /home/WorldBossRaid
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/LINEX/WorldBossRaid/build
+CMAKE_BINARY_DIR = /home/WorldBossRaid/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/server.dir/depend.make
@@ -70,74 +70,74 @@ include CMakeFiles/server.dir/progress.make
 include CMakeFiles/server.dir/flags.make
 
 CMakeFiles/server.dir/src/server/server.c.o: CMakeFiles/server.dir/flags.make
-CMakeFiles/server.dir/src/server/server.c.o: /home/LINEX/WorldBossRaid/src/server/server.c
+CMakeFiles/server.dir/src/server/server.c.o: /home/WorldBossRaid/src/server/server.c
 CMakeFiles/server.dir/src/server/server.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/server.dir/src/server/server.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/server.c.o -MF CMakeFiles/server.dir/src/server/server.c.o.d -o CMakeFiles/server.dir/src/server/server.c.o -c /home/LINEX/WorldBossRaid/src/server/server.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/server.dir/src/server/server.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/server.c.o -MF CMakeFiles/server.dir/src/server/server.c.o.d -o CMakeFiles/server.dir/src/server/server.c.o -c /home/WorldBossRaid/src/server/server.c
 
 CMakeFiles/server.dir/src/server/server.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/server.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/server/server.c > CMakeFiles/server.dir/src/server/server.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/server/server.c > CMakeFiles/server.dir/src/server/server.c.i
 
 CMakeFiles/server.dir/src/server/server.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/server.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/server/server.c -o CMakeFiles/server.dir/src/server/server.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/server.c -o CMakeFiles/server.dir/src/server/server.c.s
 
 CMakeFiles/server.dir/src/server/logic/client_handler.c.o: CMakeFiles/server.dir/flags.make
-CMakeFiles/server.dir/src/server/logic/client_handler.c.o: /home/LINEX/WorldBossRaid/src/server/logic/client_handler.c
+CMakeFiles/server.dir/src/server/logic/client_handler.c.o: /home/WorldBossRaid/src/server/logic/client_handler.c
 CMakeFiles/server.dir/src/server/logic/client_handler.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/server.dir/src/server/logic/client_handler.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/client_handler.c.o -MF CMakeFiles/server.dir/src/server/logic/client_handler.c.o.d -o CMakeFiles/server.dir/src/server/logic/client_handler.c.o -c /home/LINEX/WorldBossRaid/src/server/logic/client_handler.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/server.dir/src/server/logic/client_handler.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/client_handler.c.o -MF CMakeFiles/server.dir/src/server/logic/client_handler.c.o.d -o CMakeFiles/server.dir/src/server/logic/client_handler.c.o -c /home/WorldBossRaid/src/server/logic/client_handler.c
 
 CMakeFiles/server.dir/src/server/logic/client_handler.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/logic/client_handler.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/server/logic/client_handler.c > CMakeFiles/server.dir/src/server/logic/client_handler.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/server/logic/client_handler.c > CMakeFiles/server.dir/src/server/logic/client_handler.c.i
 
 CMakeFiles/server.dir/src/server/logic/client_handler.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/logic/client_handler.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/server/logic/client_handler.c -o CMakeFiles/server.dir/src/server/logic/client_handler.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/logic/client_handler.c -o CMakeFiles/server.dir/src/server/logic/client_handler.c.s
 
 CMakeFiles/server.dir/src/server/logic/gamestate.c.o: CMakeFiles/server.dir/flags.make
-CMakeFiles/server.dir/src/server/logic/gamestate.c.o: /home/LINEX/WorldBossRaid/src/server/logic/gamestate.c
+CMakeFiles/server.dir/src/server/logic/gamestate.c.o: /home/WorldBossRaid/src/server/logic/gamestate.c
 CMakeFiles/server.dir/src/server/logic/gamestate.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/server.dir/src/server/logic/gamestate.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/gamestate.c.o -MF CMakeFiles/server.dir/src/server/logic/gamestate.c.o.d -o CMakeFiles/server.dir/src/server/logic/gamestate.c.o -c /home/LINEX/WorldBossRaid/src/server/logic/gamestate.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/server.dir/src/server/logic/gamestate.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/gamestate.c.o -MF CMakeFiles/server.dir/src/server/logic/gamestate.c.o.d -o CMakeFiles/server.dir/src/server/logic/gamestate.c.o -c /home/WorldBossRaid/src/server/logic/gamestate.c
 
 CMakeFiles/server.dir/src/server/logic/gamestate.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/logic/gamestate.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/server/logic/gamestate.c > CMakeFiles/server.dir/src/server/logic/gamestate.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/server/logic/gamestate.c > CMakeFiles/server.dir/src/server/logic/gamestate.c.i
 
 CMakeFiles/server.dir/src/server/logic/gamestate.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/logic/gamestate.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/server/logic/gamestate.c -o CMakeFiles/server.dir/src/server/logic/gamestate.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/logic/gamestate.c -o CMakeFiles/server.dir/src/server/logic/gamestate.c.s
 
 CMakeFiles/server.dir/src/server/logic/dice.c.o: CMakeFiles/server.dir/flags.make
-CMakeFiles/server.dir/src/server/logic/dice.c.o: /home/LINEX/WorldBossRaid/src/server/logic/dice.c
+CMakeFiles/server.dir/src/server/logic/dice.c.o: /home/WorldBossRaid/src/server/logic/dice.c
 CMakeFiles/server.dir/src/server/logic/dice.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/server.dir/src/server/logic/dice.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/dice.c.o -MF CMakeFiles/server.dir/src/server/logic/dice.c.o.d -o CMakeFiles/server.dir/src/server/logic/dice.c.o -c /home/LINEX/WorldBossRaid/src/server/logic/dice.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/server.dir/src/server/logic/dice.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/logic/dice.c.o -MF CMakeFiles/server.dir/src/server/logic/dice.c.o.d -o CMakeFiles/server.dir/src/server/logic/dice.c.o -c /home/WorldBossRaid/src/server/logic/dice.c
 
 CMakeFiles/server.dir/src/server/logic/dice.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/logic/dice.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/server/logic/dice.c > CMakeFiles/server.dir/src/server/logic/dice.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/server/logic/dice.c > CMakeFiles/server.dir/src/server/logic/dice.c.i
 
 CMakeFiles/server.dir/src/server/logic/dice.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/logic/dice.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/server/logic/dice.c -o CMakeFiles/server.dir/src/server/logic/dice.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/server/logic/dice.c -o CMakeFiles/server.dir/src/server/logic/dice.c.s
 
-CMakeFiles/server.dir/src/server/security/tls.c.o: CMakeFiles/server.dir/flags.make
-CMakeFiles/server.dir/src/server/security/tls.c.o: /home/LINEX/WorldBossRaid/src/server/security/tls.c
-CMakeFiles/server.dir/src/server/security/tls.c.o: CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/server.dir/src/server/security/tls.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/server/security/tls.c.o -MF CMakeFiles/server.dir/src/server/security/tls.c.o.d -o CMakeFiles/server.dir/src/server/security/tls.c.o -c /home/LINEX/WorldBossRaid/src/server/security/tls.c
+CMakeFiles/server.dir/src/common/tls.c.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/common/tls.c.o: /home/WorldBossRaid/src/common/tls.c
+CMakeFiles/server.dir/src/common/tls.c.o: CMakeFiles/server.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/server.dir/src/common/tls.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/server.dir/src/common/tls.c.o -MF CMakeFiles/server.dir/src/common/tls.c.o.d -o CMakeFiles/server.dir/src/common/tls.c.o -c /home/WorldBossRaid/src/common/tls.c
 
-CMakeFiles/server.dir/src/server/security/tls.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/server/security/tls.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/LINEX/WorldBossRaid/src/server/security/tls.c > CMakeFiles/server.dir/src/server/security/tls.c.i
+CMakeFiles/server.dir/src/common/tls.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/server.dir/src/common/tls.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/WorldBossRaid/src/common/tls.c > CMakeFiles/server.dir/src/common/tls.c.i
 
-CMakeFiles/server.dir/src/server/security/tls.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/server/security/tls.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/LINEX/WorldBossRaid/src/server/security/tls.c -o CMakeFiles/server.dir/src/server/security/tls.c.s
+CMakeFiles/server.dir/src/common/tls.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/server.dir/src/common/tls.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/WorldBossRaid/src/common/tls.c -o CMakeFiles/server.dir/src/common/tls.c.s
 
 # Object files for target server
 server_OBJECTS = \
@@ -145,7 +145,7 @@ server_OBJECTS = \
 "CMakeFiles/server.dir/src/server/logic/client_handler.c.o" \
 "CMakeFiles/server.dir/src/server/logic/gamestate.c.o" \
 "CMakeFiles/server.dir/src/server/logic/dice.c.o" \
-"CMakeFiles/server.dir/src/server/security/tls.c.o"
+"CMakeFiles/server.dir/src/common/tls.c.o"
 
 # External object files for target server
 server_EXTERNAL_OBJECTS =
@@ -154,12 +154,12 @@ server: CMakeFiles/server.dir/src/server/server.c.o
 server: CMakeFiles/server.dir/src/server/logic/client_handler.c.o
 server: CMakeFiles/server.dir/src/server/logic/gamestate.c.o
 server: CMakeFiles/server.dir/src/server/logic/dice.c.o
-server: CMakeFiles/server.dir/src/server/security/tls.c.o
+server: CMakeFiles/server.dir/src/common/tls.c.o
 server: CMakeFiles/server.dir/build.make
 server: /usr/lib/x86_64-linux-gnu/libssl.so
 server: /usr/lib/x86_64-linux-gnu/libcrypto.so
 server: CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/LINEX/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -171,6 +171,6 @@ CMakeFiles/server.dir/clean:
 .PHONY : CMakeFiles/server.dir/clean
 
 CMakeFiles/server.dir/depend:
-	cd /home/LINEX/WorldBossRaid/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/LINEX/WorldBossRaid /home/LINEX/WorldBossRaid /home/LINEX/WorldBossRaid/build /home/LINEX/WorldBossRaid/build /home/LINEX/WorldBossRaid/build/CMakeFiles/server.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/WorldBossRaid/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/WorldBossRaid /home/WorldBossRaid /home/WorldBossRaid/build /home/WorldBossRaid/build /home/WorldBossRaid/build/CMakeFiles/server.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/server.dir/depend
 

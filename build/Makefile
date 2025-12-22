@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/LINEX/WorldBossRaid
+CMAKE_SOURCE_DIR = /home/WorldBossRaid
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/LINEX/WorldBossRaid/build
+CMAKE_BINARY_DIR = /home/WorldBossRaid/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/LINEX/WorldBossRaid/build/CMakeFiles /home/LINEX/WorldBossRaid/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/WorldBossRaid/build/CMakeFiles /home/WorldBossRaid/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/LINEX/WorldBossRaid/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/WorldBossRaid/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -214,6 +214,33 @@ src/client/ui/player.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/player.c.s
 .PHONY : src/client/ui/player.c.s
 
+src/common/tls.o: src/common/tls.c.o
+.PHONY : src/common/tls.o
+
+# target to build an object file
+src/common/tls.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/tls.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/tls.c.o
+.PHONY : src/common/tls.c.o
+
+src/common/tls.i: src/common/tls.c.i
+.PHONY : src/common/tls.i
+
+# target to preprocess a source file
+src/common/tls.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/tls.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/tls.c.i
+.PHONY : src/common/tls.c.i
+
+src/common/tls.s: src/common/tls.c.s
+.PHONY : src/common/tls.s
+
+# target to generate assembly for a file
+src/common/tls.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/common/tls.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/common/tls.c.s
+.PHONY : src/common/tls.c.s
+
 src/server/logic/client_handler.o: src/server/logic/client_handler.c.o
 .PHONY : src/server/logic/client_handler.o
 
@@ -286,30 +313,6 @@ src/server/logic/gamestate.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/logic/gamestate.c.s
 .PHONY : src/server/logic/gamestate.c.s
 
-src/server/security/tls.o: src/server/security/tls.c.o
-.PHONY : src/server/security/tls.o
-
-# target to build an object file
-src/server/security/tls.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/tls.c.o
-.PHONY : src/server/security/tls.c.o
-
-src/server/security/tls.i: src/server/security/tls.c.i
-.PHONY : src/server/security/tls.i
-
-# target to preprocess a source file
-src/server/security/tls.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/tls.c.i
-.PHONY : src/server/security/tls.c.i
-
-src/server/security/tls.s: src/server/security/tls.c.s
-.PHONY : src/server/security/tls.s
-
-# target to generate assembly for a file
-src/server/security/tls.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/server/security/tls.c.s
-.PHONY : src/server/security/tls.c.s
-
 src/server/server.o: src/server/server.c.o
 .PHONY : src/server/server.o
 
@@ -353,6 +356,9 @@ help:
 	@echo "... src/client/ui/player.o"
 	@echo "... src/client/ui/player.i"
 	@echo "... src/client/ui/player.s"
+	@echo "... src/common/tls.o"
+	@echo "... src/common/tls.i"
+	@echo "... src/common/tls.s"
 	@echo "... src/server/logic/client_handler.o"
 	@echo "... src/server/logic/client_handler.i"
 	@echo "... src/server/logic/client_handler.s"
@@ -362,9 +368,6 @@ help:
 	@echo "... src/server/logic/gamestate.o"
 	@echo "... src/server/logic/gamestate.i"
 	@echo "... src/server/logic/gamestate.s"
-	@echo "... src/server/security/tls.o"
-	@echo "... src/server/security/tls.i"
-	@echo "... src/server/security/tls.s"
 	@echo "... src/server/server.o"
 	@echo "... src/server/server.i"
 	@echo "... src/server/server.s"

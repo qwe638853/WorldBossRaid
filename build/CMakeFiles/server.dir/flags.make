@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = -I/home/LINEX/WorldBossRaid/src -I/home/LINEX/WorldBossRaid/src/common -I/home/LINEX/WorldBossRaid/src/server -I/home/LINEX/WorldBossRaid/src/client
+C_INCLUDES = -I/home/WorldBossRaid/src -I/home/WorldBossRaid/src/common -I/home/WorldBossRaid/src/server -I/home/WorldBossRaid/src/client
 
 C_FLAGS =  -Wall -Wextra -O2 -std=gnu11
 

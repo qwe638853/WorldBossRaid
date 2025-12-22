@@ -1,5 +1,5 @@
 CMakeFiles/server.dir/src/server/server.c.o: \
- /home/LINEX/WorldBossRaid/src/server/server.c /usr/include/stdc-predef.h \
+ /home/WorldBossRaid/src/server/server.c /usr/include/stdc-predef.h \
  /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -111,9 +111,8 @@ CMakeFiles/server.dir/src/server/server.c.o: \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
  /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
  /usr/include/x86_64-linux-gnu/bits/types/idtype_t.h \
- /home/LINEX/WorldBossRaid/src/server/logic/gamestate.h \
- /usr/include/pthread.h /usr/include/sched.h \
- /usr/include/x86_64-linux-gnu/bits/sched.h \
+ /home/WorldBossRaid/src/server/logic/gamestate.h /usr/include/pthread.h \
+ /usr/include/sched.h /usr/include/x86_64-linux-gnu/bits/sched.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
  /usr/include/x86_64-linux-gnu/bits/cpu-set.h /usr/include/time.h \
  /usr/include/x86_64-linux-gnu/bits/time.h \
@@ -124,13 +123,13 @@ CMakeFiles/server.dir/src/server/server.c.o: \
  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdbool.h \
- /home/LINEX/WorldBossRaid/src/server/logic/dice.h \
- /home/LINEX/WorldBossRaid/src/server/logic/../../common/protocol.h \
+ /home/WorldBossRaid/src/server/logic/dice.h \
+ /home/WorldBossRaid/src/server/logic/../../common/protocol.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/LINEX/WorldBossRaid/src/server/logic/gamestate.h \
- /home/LINEX/WorldBossRaid/src/server/logic/client_handler.h \
+ /home/WorldBossRaid/src/server/logic/gamestate.h \
+ /home/WorldBossRaid/src/server/logic/client_handler.h \
  /usr/include/openssl/ssl.h /usr/include/openssl/macros.h \
  /usr/include/x86_64-linux-gnu/openssl/opensslconf.h \
  /usr/include/x86_64-linux-gnu/openssl/configuration.h \
@@ -171,8 +170,7 @@ CMakeFiles/server.dir/src/server/server.c.o: \
  /usr/include/openssl/prov_ssl.h /usr/include/openssl/ssl2.h \
  /usr/include/openssl/ssl3.h /usr/include/openssl/tls1.h \
  /usr/include/openssl/dtls1.h /usr/include/openssl/srtp.h \
- /home/LINEX/WorldBossRaid/src/server/security/tls.h \
- /usr/include/openssl/err.h /usr/include/errno.h \
- /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
- /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /home/WorldBossRaid/src/common/tls.h /usr/include/openssl/err.h \
+ /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h
