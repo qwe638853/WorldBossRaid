@@ -1,113 +1,187 @@
 # World Boss Raid - High Concurrency Game System
 
-**World Boss Raid** 是一套基於 Linux System Programming 開發的高併發多人連線遊戲系統。本專案展示了從底層 Socket 通訊、自定義二進位協定、多行程/多執行緒架構 (Multi-Process/Multi-Thread) 到 IPC (行程間通訊) 的完整實作。
+**World Boss Raid** is a high-concurrency multiplayer online game system developed based on Linux System Programming. This project demonstrates a complete implementation from low-level Socket communication, custom binary protocol, multi-process/multi-thread architecture to IPC (Inter-Process Communication).
 
-系統模擬了大量客戶端同時攻擊世界王 (World Boss) 的場景，並透過 Ncurses 提供即時的終端機視覺化介面。
+The system simulates a scenario where multiple clients simultaneously attack a World Boss, and provides real-time terminal visualization interface through Ncurses.
 
-## Key Features (專案特色)
+## Key Features
 
-* **高效能伺服器 (High Performance Server)**
-    * 採用 **Master-Worker 多行程架構** (Process Pool)，有效利用多核心 CPU。
-    * 使用 **Shared Memory (共享記憶體)** 管理世界王血量與遊戲狀態，實現零拷貝 (Zero-Copy) 數據共享。
-    * 實作 **Semaphore (信號量)** 機制，確保並發攻擊下的資料一致性 (Data Consistency) 與執行緒安全。
-* **高併發客戶端 (Stress Test Client)**
-    * 採用 **Multi-thread (Pthreads)** 架構，單一 Client 程式可模擬 100+ 個併發連線進行壓力測試。
-    * **Ncurses TUI 介面**：即時繪製 Boss 動畫、動態血條與攻擊特效，且不影響傳輸效能。
-* **自定義通訊協定 (Custom Binary Protocol)**
-    * 不依賴 HTTP/JSON，自行設計緊湊的 **Binary Protocol**。
-    * 支援 **Checksum 完整性檢查**，防止封包損壞。
-    * 封包結構包含：Header (Length, OpCode, SeqNum) + Body (Payload Union)。
-* **容錯與穩定性**
-    * 實作 **Graceful Shutdown**：捕捉 Signal (SIGINT)，確保伺服器關閉時正確釋放 IPC 資源 (避免殭屍行程)。
-    * 具備心跳機制 (Heartbeat) 與斷線偵測。
+* **High Performance Server**
+    * **Master-Worker Multi-Process Architecture** (Process Pool) that effectively utilizes multi-core CPUs.
+    * Uses **Shared Memory** to manage World Boss HP and game state, achieving zero-copy data sharing.
+    * Implements **Semaphore** mechanism to ensure data consistency and thread safety under concurrent attacks.
+* **High Concurrency Client**
+    * **Multi-thread (Pthreads)** architecture where a single client program can simulate 100+ concurrent connections for stress testing.
+    * **Ncurses TUI Interface**: Real-time rendering of Boss animations, dynamic health bars, and attack effects without affecting transmission performance.
+* **Custom Binary Protocol**
+    * Independent of HTTP/JSON, self-designed compact **Binary Protocol**.
+    * Supports **Checksum integrity verification** to prevent packet corruption.
+    * Packet structure includes: Header (Length, OpCode, SeqNum) + Body (Payload Union).
+* **Security Features**
+    * **TLS/SSL Encryption**: Secure communication using OpenSSL with certificate verification.
+    * **Replay Attack Protection**: Sequence number validation to prevent packet replay attacks.
+    * **Multi-level Logging System**: Configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL) with file/console output support.
+* **Fault Tolerance & Stability**
+    * Implements **Graceful Shutdown**: Captures signals (SIGINT) to ensure proper release of IPC resources when the server shuts down (prevents zombie processes).
+    * Includes heartbeat mechanism and disconnection detection.
 
-## Project Structure (檔案架構)
+## Project Structure
 
 ```text
 WorldBossRaid/
-├── Makefile                # 自動化編譯腳本
-├── README.md               # 專案說明文件
+├── CMakeLists.txt          # CMake build configuration
+├── README.md               # Project documentation
 ├── src/
-│   ├── common/             # [共用層] 協定與工具
-│   │   └── protocol.h      # 定義 Packet 結構、OpCode、Payload
+│   ├── common/             # [Common Layer] Protocol & Utilities
+│   │   ├── protocol.h     # Packet structure, OpCode, Payload definitions
+│   │   ├── tls.h          # TLS/SSL wrapper functions
+│   │   ├── tls.c          # TLS/SSL implementation
+│   │   ├── log.h          # Multi-level logging system
+│   │   ├── log.c          # Logging implementation
+│   │   └── log_example.c  # Logging usage examples
 │   │
-│   ├── server/             # [伺服器端]
-│   │   ├── server.c        # 程式入口，Socket 初始化，Master-Worker 管理
-│   │   └── logic/          # [業務邏輯層]
-│   │       ├── gamestate.c # IPC 管理 (Shared Memory 建立與銷毀)
-│   │       ├── gamestate.h
-│   │       ├── dice.c      # 傷害計算與機率邏輯
-│   │       └── dice.h
+│   ├── server/            # [Server Side]
+│   │   ├── server.c       # Entry point, Socket initialization, Master-Worker management
+│   │   ├── logic/         # [Business Logic Layer]
+│   │   │   ├── client_handler.h
+│   │   │   ├── client_handler.c  # Client connection handler
+│   │   │   ├── gamestate.h
+│   │   │   ├── gamestate.c       # IPC management (Shared Memory creation/destruction)
+│   │   │   ├── dice.h
+│   │   │   └── dice.c            # Damage calculation & probability logic
+│   │   └── security/      # [Security Layer]
+│   │       ├── replay_protection.h
+│   │       └── replay_protection.c  # Replay attack protection
 │   │
-│   └── client/             # [客戶端]
-│       ├── client.c        # 建立連線、收發封包、多執行緒壓力測試
-│       └── ui/             # [介面層]
-│           ├── boss.c      # Ncurses 繪製 Boss 與血條
+│   └── client/            # [Client Side]
+│       ├── client.c       # Connection establishment, packet I/O, multi-thread stress testing
+│       └── ui/            # [UI Layer]
+│           ├── boss.c     # Ncurses rendering for Boss and health bar
 │           ├── boss.h
-│           ├── player.c    # 繪製玩家狀態
+│           ├── player.c  # Player status rendering
 │           └── player.h
 ```
 
-## Build & Run (編譯與執行)
+## Build & Run
 
-### Prerequisites (環境需求)
+### Prerequisites
 
 * Linux Environment (Ubuntu/Debian/CentOS)
 * GCC Compiler
-* Make
+* CMake (3.10 or higher)
+* OpenSSL Development Libraries
 * Ncurses Library
+* pthread (usually included in glibc)
 
 ```bash
-sudo apt-get install libncurses5-dev libncursesw5-dev
+# Ubuntu/Debian
+sudo apt-get install build-essential cmake libssl-dev libncurses5-dev libncursesw5-dev
+
+# CentOS/RHEL
+sudo yum install gcc cmake openssl-devel ncurses-devel
+
+# Fedora
+sudo dnf install gcc cmake openssl-devel ncurses-devel
 ```
 
-### Compilation (編譯)
+### Compilation
 
-專案包含完整的 Makefile，只需執行：
+The project uses CMake for building. Create a build directory and compile:
 
 ```bash
+mkdir build
+cd build
+cmake ..
 make
 ```
 
-編譯成功後將產生 server 與 client 兩個執行檔。
+After successful compilation, two executables will be generated: `server` and `client`.
 
-### Usage (執行)
+### Usage
 
-1. 啟動伺服器 (Server)
+1. **Start the Server**
 
 ```bash
+cd build
 ./server
-# Server 將會在 Port 8888 啟動，並建立 Worker Pool 等待連線
+# Server will start on port 8888 and create a Worker Pool waiting for connections
 ```
 
-2. 啟動客戶端 (Client)
+2. **Start the Client**
 
 ```bash
+cd build
 ./client
-# 啟動 Ncurses 介面，自動連線並開始攻擊
+# Launches Ncurses interface, automatically connects and starts attacking
 ```
 
-3. 清除編譯檔
+3. **Clean Build Files**
 
 ```bash
+cd build
 make clean
+# Or remove the entire build directory:
+rm -rf build
 ```
 
-## Protocol Specification (協定規範)
+## Protocol Specification
 
-通訊採用固定 Header 長度 + 變長 Body 的設計：
+Communication uses a fixed Header length + variable Body design:
 
 | Byte Offset | Field | Type | Description |
 |------------|-------|------|-------------|
-| 0-3 | Length | uint32_t | 封包總長度 (Header + Body) |
-| 4-5 | OpCode | uint16_t | 操作碼 (e.g., 0x11 Attack) |
-| 6-7 | Checksum | uint16_t | 簡單總和檢查碼 |
-| 8-11 | SeqNum | uint32_t | 封包序列號 |
-| 12+ | Body | Union | 根據 OpCode 決定 Payload 結構 |
+| 0-3 | Length | uint32_t | Total packet length (Header + Body) |
+| 4-5 | OpCode | uint16_t | Operation code (e.g., 0x11 Attack) |
+| 6-7 | Checksum | uint16_t | Simple checksum |
+| 8-11 | SeqNum | uint32_t | Packet sequence number |
+| 12+ | Body | Union | Payload structure determined by OpCode |
 
-主要 OpCodes:
+### Main OpCodes
 
-* OP_JOIN (0x10): 玩家加入請求
-* OP_ATTACK (0x11): 攻擊請求 (含傷害數值)
-* OP_GAME_STATE (0x21): 廣播 Boss 當前血量 (Server -> Client)
+* `OP_JOIN (0x10)`: Player join request
+* `OP_ATTACK (0x11)`: Attack request (includes damage value)
+* `OP_GAME_STATE (0x21)`: Broadcast Boss current HP (Server -> Client)
 
+## Security
+
+* **TLS/SSL Encryption**: All communication is encrypted using TLS 1.2+ with server certificate verification.
+* **Replay Attack Protection**: Sequence number validation prevents replaying old packets.
+* **Certificate-based Authentication**: Server uses X.509 certificates for identity verification.
+
+## Logging
+
+The project includes a multi-level logging system with the following features:
+
+* **Log Levels**: DEBUG, INFO, WARN, ERROR, FATAL
+* **Output Options**: Console (stderr) or file
+* **Automatic Timestamps**: Each log entry includes timestamp, file, line, and function name
+* **Color Support**: ANSI color codes for terminal output (automatically disabled for file output)
+
+Example usage:
+```c
+#include "common/log.h"
+
+log_init(LOG_INFO, NULL);  // Initialize with INFO level, output to stderr
+LOG_INFO("Server started on port %d", PORT);
+LOG_ERROR("Failed to bind socket: %s", strerror(errno));
+log_cleanup();
+```
+
+## Architecture
+
+### Server Architecture
+
+* **Master Process**: Accepts incoming connections and forks worker processes
+* **Worker Processes**: Handle individual client connections using TLS
+* **Shared Memory**: Game state (Boss HP, player count) shared across all workers
+* **Mutex Protection**: Ensures thread-safe access to shared game state
+
+### Client Architecture
+
+* **Main Thread**: Manages UI rendering (Ncurses)
+* **Worker Threads**: Handle network I/O and game logic
+* **TLS Connection**: Secure encrypted communication with the server
+
+## License
+
+This project is for educational purposes, demonstrating Linux system programming concepts.
