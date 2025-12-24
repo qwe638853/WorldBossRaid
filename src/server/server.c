@@ -55,7 +55,7 @@ int main(){
     // initialize the game state
     gamestate_init();
     LOG_INFO("Game state initialized");
-    
+
     // initialize the dice system (random number generator)
     dice_init();
     LOG_INFO("Dice system initialized");

@@ -47,7 +47,7 @@ void game_process_attack(int player_dice, const char* player_name,
     // 機率：0.0001% (百萬分之一)
     // 測試時建議改成 (rand() % 100) == 0 來比較好觸發
     // bool is_lucky_kill = (rand() % 1000000) == 777777;
-    bool is_lucky_kill = (rand() % 2) == 0;
+    bool is_lucky_kill = (rand() % 1000000) == 0;
 
     if (is_lucky_kill) {
         LOG_WARN("EASTER EGG: %s triggered LUCKY KILL! (0.0001%% chance)", player_name);

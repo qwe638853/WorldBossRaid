@@ -26,6 +26,8 @@ set(SERVER_SOURCES
     src/server/logic/gamestate.c
     src/server/logic/dice.c
     src/server/security/replay_protection.c
+    src/server/security/rate_limiter.c
+    src/server/security/input_validator.c
     src/common/tls.c
     src/common/log.c
 )
