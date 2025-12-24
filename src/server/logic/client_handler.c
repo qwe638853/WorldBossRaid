@@ -12,6 +12,8 @@
 #include "gamestate.h"
 #include "dice.h"
 #include "../security/replay_protection.h"
+#include "../security/rate_limiter.h"
+#include "../security/input_validator.h"
 
 
 // 預期完整流程：
@@ -50,6 +52,11 @@ void handle_client(SSL *ssl) {
     // 初始化 Replay Protection（防止重放攻擊）
     ReplayProtection rp;
     replay_protection_init(&rp);
+    
+    // 初始化 Rate Limiter（防止 DDoS 和刷攻擊）
+    // 限制：每秒最多 5 個請求
+    RateLimiter rl;
+    rate_limiter_init(&rl, 5, 1);
 
     // 接收第一包 OP_JOIN
     if (recv_packet(ssl, &packet, &rp) < 0) {
@@ -61,6 +68,12 @@ void handle_client(SSL *ssl) {
     // 必須先 JOIN 才能進入遊戲
     if (packet.header.opcode != OP_JOIN) {
         LOG_WARN("First packet is not OP_JOIN, opcode=0x%02X", packet.header.opcode);
+        goto cleanup;
+    }
+    
+    // 驗證輸入（用戶名）
+    if (!input_validate_username(packet.body.join.username)) {
+        LOG_ERROR("Invalid username in OP_JOIN packet");
         goto cleanup;
     }
 
@@ -75,6 +88,24 @@ void handle_client(SSL *ssl) {
         if (recv_packet(ssl, &packet, &rp) < 0) {
             LOG_INFO("Client disconnected or recv error, closing connection");
             break;
+        }
+        
+        // Rate Limiting 檢查（防止刷攻擊）
+        if (!rate_limiter_check(&rl)) {
+            LOG_WARN("Rate limit exceeded for player %s, closing connection", username);
+            goto cleanup;
+        }
+        
+        // 驗證 OpCode
+        if (!input_validate_opcode(packet.header.opcode)) {
+            LOG_WARN("Invalid opcode from client: 0x%02X", packet.header.opcode);
+            goto cleanup;
+        }
+        
+        // 驗證封包大小
+        if (!input_validate_packet_size(packet.header.opcode, packet.header.length)) {
+            LOG_WARN("Invalid packet size for opcode 0x%02X", packet.header.opcode);
+            goto cleanup;
         }
 
         switch (packet.header.opcode) {
@@ -204,6 +235,14 @@ static int recv_packet(SSL *ssl, GamePacket *pkt, ReplayProtection *rp) {
             return -1;
         }
         received += (size_t)n;
+    }
+    
+    // 驗證 Checksum（防止封包損壞或被篡改）
+    uint16_t calculated_checksum = calc_checksum((const uint8_t *)&pkt->body.raw[0], body_len);
+    if (calculated_checksum != pkt->header.checksum) {
+        LOG_ERROR("Checksum mismatch: expected=%u, got=%u (packet may be corrupted or tampered)",
+                 calculated_checksum, pkt->header.checksum);
+        return -1;
     }
 
     return 0;
