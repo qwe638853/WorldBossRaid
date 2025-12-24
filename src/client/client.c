@@ -1,9 +1,3 @@
-// client.c - Client for World Boss Raid
-//
-// 提供兩種模式：
-// 1. 一般互動模式（預設）：單一玩家，透過 TLS 連線手動攻擊世界王。
-// 2. 壓力測試模式（--stress）：使用多個 thread 同時連線並自動攻擊，用來測試 Server 承載量。
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +6,9 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include <ncurses.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <time.h>
 
 #include "common/protocol.h"
 #include "common/tls.h"
@@ -28,6 +25,24 @@
 
 // 簡單的全域序號計數器（真的要用時可以做成 thread-safe）
 static uint32_t g_seq_num = 1;
+
+// ---------------------------------------------------------------------------
+// Multi-threaded 架構：共享資料結構
+// ---------------------------------------------------------------------------
+
+typedef struct {
+    pthread_mutex_t lock;              // 保護共享資料
+    pthread_cond_t state_updated_cond;  // 通知 UI 有新狀態
+    pthread_cond_t attack_request_cond; // 通知 Network 有攻擊請求
+    
+    UiGameState latest_state;          // 最新的遊戲狀態
+    bool state_updated;                // 是否有新狀態
+    bool attack_requested;             // UI 是否請求攻擊
+    bool attack_completed;             // 攻擊是否完成
+    bool should_exit;                  // 是否應該退出
+    
+    int network_error;                 // Network Thread 的錯誤碼（0=成功）
+} SharedGameState;
 
 // 壓力測試相關常數
 #define STRESS_WORKER_COUNT        100   // 同時開多少條連線
@@ -279,7 +294,309 @@ static int net_heartbeat_get_state(SSL *ssl, Payload_GameState *out_state) {
 }
 
 // ---------------------------------------------------------------------------
-// 一般互動模式：單一玩家 + 單執行緒
+// Multi-threaded 架構：Network Thread（處理所有網路操作）
+// ---------------------------------------------------------------------------
+
+typedef struct {
+    SSL *ssl;
+    SharedGameState *shared;
+} NetworkThreadArgs;
+
+static void *network_thread_func(void *arg) {
+    NetworkThreadArgs *args = (NetworkThreadArgs *)arg;
+    SSL *ssl = args->ssl;
+    SharedGameState *shared = args->shared;
+    
+    pthread_mutex_lock(&shared->lock);
+    shared->network_error = 0;
+    pthread_mutex_unlock(&shared->lock);
+    
+    // 先發送一次 heartbeat 來初始化狀態
+    Payload_GameState server_state;
+    if (net_heartbeat_get_state(ssl, &server_state) == 0) {
+        pthread_mutex_lock(&shared->lock);
+        shared->latest_state.boss_hp = server_state.boss_hp;
+        shared->latest_state.max_hp = server_state.max_hp;
+        shared->latest_state.online_count = server_state.online_count;
+        shared->latest_state.stage = server_state.stage;
+        shared->latest_state.is_respawning = server_state.is_respawning;
+        shared->latest_state.is_lucky = server_state.is_lucky;
+        shared->latest_state.is_crit = 0;
+        shared->latest_state.last_player_damage = 0;
+        shared->latest_state.last_boss_dice = 0;
+        shared->latest_state.last_player_streak = 0;
+        shared->latest_state.dmg_taken = 0;
+        strncpy(shared->latest_state.last_killer, server_state.last_killer, UI_MAX_NAME - 1);
+        shared->latest_state.last_killer[UI_MAX_NAME - 1] = '\0';
+        shared->state_updated = true;
+        pthread_cond_signal(&shared->state_updated_cond);
+        pthread_mutex_unlock(&shared->lock);
+    }
+    
+    // 持續循環：處理攻擊請求和定期 heartbeat
+    while (!shared->should_exit) {
+        bool has_attack = false;
+        
+        // 檢查是否有攻擊請求
+        pthread_mutex_lock(&shared->lock);
+        if (shared->attack_requested) {
+            has_attack = true;
+            shared->attack_requested = false; // 標記為正在處理
+        }
+        pthread_mutex_unlock(&shared->lock);
+        
+        if (has_attack) {
+            // 處理攻擊請求
+            Payload_GameState server_state;
+            if (net_attack_and_get_state(ssl, &server_state) == 0) {
+                // 更新共享狀態
+                pthread_mutex_lock(&shared->lock);
+                shared->latest_state.boss_hp = server_state.boss_hp;
+                shared->latest_state.max_hp = server_state.max_hp;
+                shared->latest_state.online_count = server_state.online_count;
+                shared->latest_state.stage = server_state.stage;
+                shared->latest_state.is_respawning = server_state.is_respawning;
+                shared->latest_state.is_crit = server_state.is_crit;
+                shared->latest_state.is_lucky = server_state.is_lucky;
+                shared->latest_state.last_player_damage = server_state.last_player_damage;
+                shared->latest_state.last_boss_dice = server_state.last_boss_dice;
+                shared->latest_state.last_player_streak = server_state.last_player_streak;
+                shared->latest_state.dmg_taken = server_state.dmg_taken;
+                strncpy(shared->latest_state.last_killer, server_state.last_killer, UI_MAX_NAME - 1);
+                shared->latest_state.last_killer[UI_MAX_NAME - 1] = '\0';
+                shared->state_updated = true;
+                shared->attack_completed = true;
+                pthread_cond_signal(&shared->state_updated_cond);
+                pthread_mutex_unlock(&shared->lock);
+            } else {
+                // 攻擊失敗
+                pthread_mutex_lock(&shared->lock);
+                shared->network_error = -1;
+                shared->attack_completed = true;
+                pthread_cond_signal(&shared->state_updated_cond);
+                pthread_mutex_unlock(&shared->lock);
+            }
+        } else {
+            // 沒有攻擊請求，發送 heartbeat
+            Payload_GameState server_state;
+            if (net_heartbeat_get_state(ssl, &server_state) == 0) {
+                // 更新共享狀態（heartbeat 不包含攻擊相關資訊）
+                pthread_mutex_lock(&shared->lock);
+                shared->latest_state.boss_hp = server_state.boss_hp;
+                shared->latest_state.max_hp = server_state.max_hp;
+                shared->latest_state.online_count = server_state.online_count;
+                shared->latest_state.stage = server_state.stage;
+                shared->latest_state.is_respawning = server_state.is_respawning;
+                // heartbeat 時保留 is_lucky（用於廣播 Lucky Kill）
+                shared->latest_state.is_lucky = server_state.is_lucky;
+                // heartbeat 時清除攻擊相關資訊（除非是 Lucky Kill）
+                if (!server_state.is_lucky) {
+                    shared->latest_state.is_crit = 0;
+                    shared->latest_state.last_player_damage = 0;
+                    shared->latest_state.last_boss_dice = 0;
+                    shared->latest_state.last_player_streak = 0;
+                    shared->latest_state.dmg_taken = 0;
+                }
+                strncpy(shared->latest_state.last_killer, server_state.last_killer, UI_MAX_NAME - 1);
+                shared->latest_state.last_killer[UI_MAX_NAME - 1] = '\0';
+                shared->state_updated = true;
+                pthread_cond_signal(&shared->state_updated_cond);
+                pthread_mutex_unlock(&shared->lock);
+            } else {
+                // Heartbeat 失敗，可能是連線斷了
+                pthread_mutex_lock(&shared->lock);
+                shared->network_error = -1;
+                shared->should_exit = true;
+                pthread_cond_signal(&shared->state_updated_cond);
+                pthread_mutex_unlock(&shared->lock);
+                break;
+            }
+            
+            // 等待 0.5 秒後再發送下一次 heartbeat
+            usleep(500000);
+        }
+    }
+    
+    return NULL;
+}
+
+// ---------------------------------------------------------------------------
+// Multi-threaded 架構：一般互動模式（UI Thread + Network Thread）
+// ---------------------------------------------------------------------------
+
+static int run_interactive_mode_threaded(void) {
+    SSL_CTX *ctx = NULL;
+    SSL *ssl = NULL;
+    int sockfd = -1;
+    int player_id = -1;
+    pthread_t network_thread;
+    NetworkThreadArgs net_args;
+    SharedGameState shared;
+    int ret = EXIT_FAILURE;
+    
+    // 初始化共享資料結構
+    pthread_mutex_init(&shared.lock, NULL);
+    pthread_cond_init(&shared.state_updated_cond, NULL);
+    pthread_cond_init(&shared.attack_request_cond, NULL);
+    memset(&shared.latest_state, 0, sizeof(UiGameState));
+    shared.state_updated = false;
+    shared.attack_requested = false;
+    shared.attack_completed = false;
+    shared.should_exit = false;
+    shared.network_error = 0;
+    
+    // 1. 初始化 TLS
+    tls_init_openssl();
+    ctx = tls_create_client_context(CA_CERT_FILE);
+    if (!ctx) {
+        fprintf(stderr, "Failed to create TLS context\n");
+        goto cleanup_shared;
+    }
+    
+    // 2. 建立 TCP 連線
+    sockfd = connect_to_server();
+    if (sockfd < 0) {
+        goto cleanup_ctx;
+    }
+    
+    // 3. 執行 TLS 握手
+    ssl = tls_client_handshake(ctx, sockfd);
+    if (!ssl) {
+        fprintf(stderr, "TLS handshake failed\n");
+        goto cleanup_sock;
+    }
+    
+    // 4. 驗證伺服器證書（如果提供了 CA 證書）
+    if (CA_CERT_FILE != NULL) {
+        if (tls_verify_server_certificate(ssl) != 0) {
+            fprintf(stderr, "Server certificate verification failed!\n");
+            goto cleanup_ssl;
+        }
+    }
+    
+    // 5. 啟動 ncurses，顯示登入畫面取得玩家名稱
+    char username[MAX_PLAYER_NAME] = {0};
+    initscr();
+    cbreak();
+    noecho();
+    curs_set(0);
+    start_color();
+    
+    ui_login_get_player_name(username, sizeof(username));
+    
+    // 6. 送出 OP_JOIN 並等待回覆（這部分仍在主線程，因為在 login 之後）
+    player_id = send_join_and_wait_resp(ssl, username);
+    if (player_id < 0) {
+        fprintf(stderr, "Join failed. Exit.\n");
+        goto cleanup_ncurses;
+    }
+    
+    // 7. 啟動 Network Thread
+    net_args.ssl = ssl;
+    net_args.shared = &shared;
+    if (pthread_create(&network_thread, NULL, network_thread_func, &net_args) != 0) {
+        perror("pthread_create (network)");
+        goto cleanup_ncurses;
+    }
+    
+    // 8. 在主線程（UI Thread）中運行 ui_game_loop
+    // attack callback：通過共享資料結構與 Network Thread 通信
+    int attack_cb_impl(UiGameState *out_state) {
+        if (!out_state) return -1;
+        
+        // 請求攻擊
+        pthread_mutex_lock(&shared.lock);
+        shared.attack_requested = true;
+        shared.attack_completed = false;
+        pthread_cond_signal(&shared.attack_request_cond);
+        pthread_mutex_unlock(&shared.lock);
+        
+        // 等待 Network Thread 完成攻擊（使用超時避免永久阻塞）
+        struct timespec timeout;
+        clock_gettime(CLOCK_REALTIME, &timeout);
+        timeout.tv_sec += 5; // 5 秒超時
+        
+        pthread_mutex_lock(&shared.lock);
+        while (!shared.attack_completed && !shared.should_exit) {
+            int ret = pthread_cond_timedwait(&shared.state_updated_cond, &shared.lock, &timeout);
+            if (ret == ETIMEDOUT) {
+                // 超時
+                pthread_mutex_unlock(&shared.lock);
+                return -1;
+            }
+        }
+        
+        if (shared.network_error != 0 || shared.should_exit) {
+            pthread_mutex_unlock(&shared.lock);
+            return -1;
+        }
+        
+        // 複製最新狀態
+        *out_state = shared.latest_state;
+        shared.state_updated = false;
+        pthread_mutex_unlock(&shared.lock);
+        
+        return 0;
+    }
+    
+    // heartbeat callback：從共享資料結構讀取最新狀態
+    int heartbeat_cb_impl(UiGameState *out_state) {
+        if (!out_state) return -1;
+        
+        pthread_mutex_lock(&shared.lock);
+        // 檢查是否有新狀態
+        if (shared.state_updated) {
+            *out_state = shared.latest_state;
+            shared.state_updated = false;
+            pthread_mutex_unlock(&shared.lock);
+            return 0;
+        }
+        // 沒有新狀態，返回當前狀態
+        *out_state = shared.latest_state;
+        pthread_mutex_unlock(&shared.lock);
+        return 0;
+    }
+    
+    // 運行 UI 迴圈（在主線程中，因為 ncurses 必須在同一個線程）
+    ui_game_loop(username, attack_cb_impl, heartbeat_cb_impl);
+    
+    // 9. 通知 Network Thread 退出
+    pthread_mutex_lock(&shared.lock);
+    shared.should_exit = true;
+    pthread_cond_signal(&shared.attack_request_cond);
+    pthread_mutex_unlock(&shared.lock);
+    
+    // 10. 等待 Network Thread 結束
+    pthread_join(network_thread, NULL);
+    
+    ret = (player_id >= 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    
+cleanup_ncurses:
+    endwin();
+cleanup_ssl:
+    if (ssl) {
+        tls_shutdown(ssl);
+        tls_free_ssl(ssl);
+    }
+cleanup_sock:
+    if (sockfd >= 0) {
+        close(sockfd);
+    }
+cleanup_ctx:
+    if (ctx) {
+        tls_cleanup_context(ctx);
+    }
+    tls_cleanup_openssl();
+cleanup_shared:
+    pthread_mutex_destroy(&shared.lock);
+    pthread_cond_destroy(&shared.state_updated_cond);
+    pthread_cond_destroy(&shared.attack_request_cond);
+    
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+// 一般互動模式：單一玩家 + 單執行緒（保留作為備用）
 // ---------------------------------------------------------------------------
 
 static int run_interactive_mode(void) {
@@ -514,7 +831,12 @@ int main(int argc, char **argv) {
         // 壓力測試模式  ./client --stress
         return run_stress_mode();
     }
+    if (argc > 1 && strcmp(argv[1], "--single-thread") == 0) {
+        // 單線程模式（備用）  ./client --single-thread
+        return run_interactive_mode();
+    }
 
-    // 預設：一般互動模式
-    return run_interactive_mode();
+    // 預設：Multi-threaded 架構（UI Thread + Network Thread）
+    return run_interactive_mode_threaded();
 }
+>>>>>>> 59dc56b (muti-thread)
