@@ -23,8 +23,8 @@ void sigchld_handler(int s) {
     while(waitpid(-1, NULL, WNOHANG) > 0); 
 }
 
-// signal handler for the ctrl + c
-void sigint_handler(int s) {
+// signal handler for the ctrl + \ (SIGQUIT)
+void sigquit_handler(int s) {
     (void)s; // 避免未使用參數警告
     LOG_INFO("Server shutting down... cleaning up IPC.");
     gamestate_destroy(); // release the shared memory (critical!)
@@ -70,12 +70,22 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    // Setup SIGINT handler for graceful shutdown
-    sa.sa_handler = sigint_handler;
+    // Setup SIGQUIT handler for graceful shutdown (Ctrl+\)
+    sa.sa_handler = sigquit_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    if (sigaction(SIGQUIT, &sa, NULL) == -1) {
+        LOG_ERROR("Failed to setup SIGQUIT handler: %s", strerror(errno));
+        log_cleanup();
+        exit(EXIT_FAILURE);
+    }
+
+    // Disable SIGINT (Ctrl+C)
+    sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     if (sigaction(SIGINT, &sa, NULL) == -1) {
-        LOG_ERROR("Failed to setup SIGINT handler: %s", strerror(errno));
+        LOG_ERROR("Failed to disable SIGINT: %s", strerror(errno));
         log_cleanup();
         exit(EXIT_FAILURE);
     }
