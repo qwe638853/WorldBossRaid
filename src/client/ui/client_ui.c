@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h> // 用於 bool 類型
 #include <unistd.h> // 用於 usleep (動畫延遲)
 #include <time.h>
 #include "client_ui.h"
 #include "bonus.h"
 #include "end_ui.h"
+#include "god.h"
 
 // 定義圖檔名稱
 #define FILE_STAGE_1 "../src/client/ui/AsciiText.txt"
@@ -26,6 +28,7 @@ typedef struct {
     char dice_visual[100]; // 骰子顯示字串
     char last_killer[UI_MAX_NAME]; // 最後一擊玩家名稱（顯示 Victory 用）
     char player_name[UI_MAX_NAME]; // 當前玩家名稱（顯示在 UI 上）
+    bool has_shown_lucky_kill; // 是否已經顯示過 Lucky Kill 畫面（避免重複顯示）
 } LocalGameState;
 
 static LocalGameState state;
@@ -186,6 +189,7 @@ int ui_game_loop(const char *player_name, UiAttackCallback attack_cb, UiHeartbea
     state.max_hp = 0;
     state.player_hp = PLAYER_MAX_HP;
     state.stage = 1;
+    state.has_shown_lucky_kill = false;
     strcpy(state.log_msg, "Connecting to Boss...");
     strcpy(state.dice_visual, "Dice: [?] [?] [?]");
     if (player_name) {
@@ -222,14 +226,26 @@ int ui_game_loop(const char *player_name, UiAttackCallback attack_cb, UiHeartbea
                          "You vs Boss: [%d] vs [%d]",
                          (int)g.last_player_damage, (int)g.last_boss_dice);
 
-                if (g.is_lucky) {
+                // 處理 Lucky Kill：所有客戶端都顯示 god 畫面（最高優先）
+                if (g.is_lucky && !state.has_shown_lucky_kill) {
                     strcpy(state.log_msg, "LUCKY MAN!!! INSTANT KILL!");
-                    ui_show_bonus_screen();
-                } else if (g.is_crit) {
-                    snprintf(state.log_msg, sizeof(state.log_msg),
-                             "CRIT! -%d (Combo x%d)",
-                             (int)g.last_player_damage, (int)g.last_player_streak);
-                } else if (g.dmg_taken > 0) {
+                    ui_show_god_screen(); // 顯示天選之人畫面
+                    state.has_shown_lucky_kill = true; // 標記已顯示，避免重複
+                }
+                // 處理一般爆擊 / 三連擊：顯示 bonus 畫面（只有自己看到）
+                else if (g.is_crit) {
+                    if (g.last_player_streak >= 3) {
+                        snprintf(state.log_msg, sizeof(state.log_msg),
+                                 "CRIT! -%d (Combo x%d)",
+                                 (int)g.last_player_damage, (int)g.last_player_streak);
+                    } else {
+                        snprintf(state.log_msg, sizeof(state.log_msg),
+                                 "CRIT! -%d",
+                                 (int)g.last_player_damage);
+                    }
+                    ui_show_bonus_screen(); // 顯示 CRIT / COMBO 動畫
+                }
+                else if (g.dmg_taken > 0) {
                     snprintf(state.log_msg, sizeof(state.log_msg),
                              "Ouch! Boss hits you for %d", (int)g.dmg_taken);
                 } else {
@@ -258,6 +274,17 @@ int ui_game_loop(const char *player_name, UiAttackCallback attack_cb, UiHeartbea
                     state.stage = (g.stage == 0) ? 1 : (g.stage == 1 ? 2 : state.stage);
                     strncpy(state.last_killer, g.last_killer, UI_MAX_NAME - 1);
                     state.last_killer[UI_MAX_NAME - 1] = '\0';
+
+                    // 心跳也要能偵測到「Lucky Kill 事件」→ 所有 Client 一起顯示 god 畫面
+                    if (g.is_lucky && !state.has_shown_lucky_kill) {
+                        ui_show_god_screen();
+                        state.has_shown_lucky_kill = true; // 標記已顯示，避免重複
+                    }
+                    
+                    // 如果 Lucky Kill 事件已經結束（is_lucky 變回 0），重置標記
+                    if (!g.is_lucky && state.has_shown_lucky_kill) {
+                        state.has_shown_lucky_kill = false;
+                    }
 
                     // 心跳也要能偵測到「第二隻 Boss 被打死」→ 所有 Client 一起進 Victory 畫面
                     if (g.stage == 2 && g.boss_hp <= 0 && !g.is_respawning) {

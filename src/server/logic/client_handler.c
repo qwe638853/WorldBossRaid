@@ -95,7 +95,22 @@ void handle_client(SSL *ssl) {
                 state.stage = (uint8_t)snap.stage;
                 state.is_respawning = snap.is_respawning ? 1 : 0;
                 state.is_crit = 0;
-                state.is_lucky = 0;
+                
+                // 檢查是否有待廣播的 Lucky Kill 事件
+                // 如果事件超過 5 秒，自動清除
+                if (snap.has_lucky_kill_event) {
+                    time_t now = time(NULL);
+                    if (now - snap.lucky_kill_timestamp > 5) {
+                        // 超過 5 秒，清除標記
+                        gamestate_clear_lucky_kill();
+                        state.is_lucky = 0;
+                    } else {
+                        state.is_lucky = 1;
+                    }
+                } else {
+                    state.is_lucky = 0;
+                }
+                
                 state.last_player_damage = 0;
                 state.last_boss_dice = 0;
                 state.last_player_streak = 0;

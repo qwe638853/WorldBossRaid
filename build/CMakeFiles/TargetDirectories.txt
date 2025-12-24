@@ -1,4 +1,4 @@
-/mnt/c/Users/liuet/UI/WorldBossRaid/build/CMakeFiles/server.dir
-/mnt/c/Users/liuet/UI/WorldBossRaid/build/CMakeFiles/client.dir
-/mnt/c/Users/liuet/UI/WorldBossRaid/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/liuet/UI/WorldBossRaid/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles/server.dir
+/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles/client.dir
+/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles/rebuild_cache.dir

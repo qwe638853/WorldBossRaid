@@ -46,10 +46,14 @@ void game_process_attack(int player_dice, const char* player_name,
     // --- 彩蛋 1: 天選之人 (Lucky Kill) ---
     // 機率：0.0001% (百萬分之一)
     // 測試時建議改成 (rand() % 100) == 0 來比較好觸發
-    bool is_lucky_kill = (rand() % 1000000) == 777777;
+    // bool is_lucky_kill = (rand() % 1000000) == 777777;
+    bool is_lucky_kill = (rand() % 2) == 0;
 
     if (is_lucky_kill) {
         LOG_WARN("EASTER EGG: %s triggered LUCKY KILL! (0.0001%% chance)", player_name);
+        
+        // 標記 Lucky Kill 事件，讓所有客戶端都能通過 heartbeat 檢測到
+        gamestate_mark_lucky_kill();
         
         // 設定回傳狀態
         result_out->is_win = true;

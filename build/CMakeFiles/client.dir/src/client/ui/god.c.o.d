@@ -1,5 +1,5 @@
-CMakeFiles/client.dir/src/client/ui/bonus.c.o: \
- /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/bonus.c \
+CMakeFiles/client.dir/src/client/ui/god.c.o: \
+ /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/god.c \
  /usr/include/stdc-predef.h /usr/include/curses.h \
  /usr/include/ncurses_dll.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
@@ -74,4 +74,4 @@ CMakeFiles/client.dir/src/client/ui/bonus.c.o: \
  /usr/include/x86_64-linux-gnu/bits/time.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
- /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/bonus.h
+ /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/god.h

@@ -118,6 +118,7 @@ set(CLIENT_SOURCES
     src/client/ui/login.c
     src/client/ui/bonus.c
     src/client/ui/end.c
+    src/client/ui/god.c
     src/common/tls.c
     src/common/log.c
 )
