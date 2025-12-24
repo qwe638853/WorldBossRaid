@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h> // 用於 time_t
 
 // 內部全域變數 (Singleton pattern)
 static GameSharedData *shm = NULL;
@@ -41,6 +42,8 @@ void gamestate_init() {
     shm->current_hp = BOSS_1_MAX_HP;
     shm->online_count = 0;
     shm->is_respawning = false;
+    shm->has_lucky_kill_event = false;
+    shm->lucky_kill_timestamp = 0;
     memset(shm->last_killer, 0, sizeof(shm->last_killer));
 
     // --- 新增：清空玩家紀錄表 ---
@@ -213,4 +216,23 @@ int gamestate_update_streak(const char* name, int current_dice, bool is_win) {
 
     pthread_mutex_unlock(&shm->lock);
     return streak; // 回傳目前的連擊數
+}
+
+// --- 新增：Lucky Kill 事件管理 ---
+
+void gamestate_mark_lucky_kill(void) {
+    if (!shm) return;
+    pthread_mutex_lock(&shm->lock);
+    shm->has_lucky_kill_event = true;
+    shm->lucky_kill_timestamp = time(NULL); // 記錄當前時間
+    pthread_mutex_unlock(&shm->lock);
+    LOG_INFO("Lucky Kill event marked for broadcast");
+}
+
+void gamestate_clear_lucky_kill(void) {
+    if (!shm) return;
+    pthread_mutex_lock(&shm->lock);
+    shm->has_lucky_kill_event = false;
+    shm->lucky_kill_timestamp = 0;
+    pthread_mutex_unlock(&shm->lock);
 }

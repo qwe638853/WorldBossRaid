@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/client.dir/src/client/ui/client_ui.c.o.d"
   "CMakeFiles/client.dir/src/client/ui/end.c.o"
   "CMakeFiles/client.dir/src/client/ui/end.c.o.d"
+  "CMakeFiles/client.dir/src/client/ui/god.c.o"
+  "CMakeFiles/client.dir/src/client/ui/god.c.o.d"
   "CMakeFiles/client.dir/src/client/ui/login.c.o"
   "CMakeFiles/client.dir/src/client/ui/login.c.o.d"
   "CMakeFiles/client.dir/src/common/log.c.o"

@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h> // 用於 time_t
 
 // --- 定義常數 ---
 #define BOSS_1_MAX_HP 1000
@@ -43,6 +44,13 @@ typedef struct {
     // --- 狀態標記 ---
     bool is_respawning;   // 是否正在重生冷卻中
     char last_killer[32]; // 上一隻王的擊殺者名字 (給廣播用)
+    
+    // --- 新增：Lucky Kill 廣播標記 ---
+    // 當有玩家觸發 Lucky Kill 時，設置此標記為 true，並記錄時間戳
+    // 所有客戶端通過 heartbeat 檢測到此標記後，會顯示 god 畫面
+    // 5 秒後自動清除標記
+    bool has_lucky_kill_event; // 是否有待廣播的 Lucky Kill 事件
+    time_t lucky_kill_timestamp; // Lucky Kill 事件的時間戳
 
     // --- 新增：玩家連擊紀錄表 ---
     PlayerHistory players[MAX_TRACKED_PLAYERS]; 
@@ -77,5 +85,13 @@ void gamestate_spawn_next_boss();
 // 參數：name(名字), current_dice(這次骰多少), is_win(這次贏了嗎)
 // 回傳：目前的連擊次數 (如果是 3 就代表觸發彩蛋)
 int gamestate_update_streak(const char* name, int current_dice, bool is_win);
+
+// 7. 新增：標記 Lucky Kill 事件 (給 Dice 模組呼叫)
+// 當有玩家觸發 Lucky Kill 時，設置此標記，讓所有客戶端都能通過 heartbeat 檢測到
+void gamestate_mark_lucky_kill(void);
+
+// 8. 新增：清除 Lucky Kill 事件標記 (給 Client Handler 呼叫)
+// 當客戶端已經處理完 Lucky Kill 事件後，清除標記
+void gamestate_clear_lucky_kill(void);
 
 #endif
