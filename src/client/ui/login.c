@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h> 
-
+#include "login.h"
 // --- 霸氣全大寫 ASCII LOGO (WORLD BOSS RAID) ---
 const char *TITLE_ART[] = {
     "__          __   ____    _____    _       _____  ",
@@ -29,14 +29,14 @@ const char *TITLE_ART[] = {
 };
 
 // 計算 Logo 高度
-int get_logo_height() {
+static int get_logo_height() {
     int h = 0;
     while(TITLE_ART[h] != NULL) h++;
     return h;
 }
 
 // 繪製 Logo (紅色 + 置中)
-void draw_logo(int start_y) {
+static void draw_logo(int start_y) {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -64,7 +64,7 @@ void draw_logo(int start_y) {
 }
 
 // 繪製輸入框
-void draw_input_box(int y, int width, char *buffer) {
+static void draw_input_box(int y, int width, char *buffer) {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
     int x = (cols - width) / 2; // 水平置中
@@ -106,13 +106,12 @@ void draw_input_box(int y, int width, char *buffer) {
     curs_set(0);
 }
 
-int main() {
-    initscr();
-    cbreak();
-    start_color();
-    
+void ui_login_get_player_name(char *out_name, int max_len) {
+    if (!out_name || max_len <= 0) return;
+
+    // 假設外部已經呼叫過 initscr()/start_color()
     clear();
-    
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -155,17 +154,7 @@ int main() {
     refresh();
     sleep(1);
 
-    mvprintw(box_y + 5, (cols - 25)/2, "Loading Game World...");
-    refresh();
-    sleep(1);
-
-    // 存檔
-    FILE *fp = fopen("player_name.txt", "w");
-    if (fp) {
-        fprintf(fp, "%s", player_name);
-        fclose(fp);
-    }
-
-    endwin();
-    return 0;
+    // 將名稱複製給呼叫者
+    strncpy(out_name, player_name, max_len - 1);
+    out_name[max_len - 1] = '\0';
 }

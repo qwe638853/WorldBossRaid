@@ -38,7 +38,7 @@ static int send_packet(SSL *ssl, GamePacket *pkt, size_t payload_size);
 static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id, char *out_username);
 
 // 處理 OP_ATTACK：擲骰子、改 Boss HP、回最新 OP_GAME_STATE
-static int handle_attack(SSL *ssl, const char *player_name);
+static int handle_attack(SSL *ssl, GamePacket *pkt_in, const char *player_name);
 
 // handle client connection in worker process
 // 接收 SSL* 物件，內部自動使用 SSL_read/SSL_write 進行加密通訊
@@ -79,7 +79,7 @@ void handle_client(SSL *ssl) {
 
         switch (packet.header.opcode) {
             case OP_ATTACK:
-                if (handle_attack(ssl, username) < 0) {
+                if (handle_attack(ssl, &packet, username) < 0) {
                     LOG_ERROR("handle_attack failed");
                     goto cleanup;
                 }
@@ -92,6 +92,15 @@ void handle_client(SSL *ssl) {
                 state.boss_hp = snap.current_hp;
                 state.max_hp = snap.max_hp;
                 state.online_count = snap.online_count;
+                state.stage = (uint8_t)snap.stage;
+                state.is_respawning = snap.is_respawning ? 1 : 0;
+                state.is_crit = 0;
+                state.is_lucky = 0;
+                state.last_player_damage = 0;
+                state.last_boss_dice = 0;
+                state.last_player_streak = 0;
+                state.dmg_taken = 0;
+                strncpy(state.last_killer, snap.last_killer, MAX_PLAYER_NAME);
 
                 GamePacket resp;
                 memset(&resp, 0, sizeof(resp));
@@ -236,18 +245,31 @@ static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id, char *o
     return 0;
 }
 
-static int handle_attack(SSL *ssl, const char *player_name) {
-    if (!ssl || !player_name) return -1;
+static int handle_attack(SSL *ssl, GamePacket *pkt_in, const char *player_name) {
+    if (!ssl || !player_name || !pkt_in) return -1;
 
-    int player_dice = (rand() % 6) + 1;
+    // 如果 client 有帶骰子值則使用，否則 server 自行擲骰
+    int player_dice = pkt_in->body.attack.damage;
+    if (player_dice <= 0 || player_dice > 6) {
+        player_dice = (rand() % 6) + 1;
+    }
 
     AttackResult result;
     Payload_GameState state;
     game_process_attack(player_dice, player_name, &result, &state);
 
-    LOG_DEBUG("Attack: player=%s dice=%d boss_dice=%d dmg=%d taken=%d",
+    // 附加本次戰鬥資訊到回傳狀態
+    state.is_crit = result.is_crit ? 1 : 0;
+    state.is_lucky = result.is_lucky_kill ? 1 : 0;
+    state.last_player_damage = result.dmg_dealt;
+    state.last_boss_dice = result.boss_dice;
+    state.last_player_streak = result.current_streak;
+    state.dmg_taken = result.dmg_taken;
+
+    LOG_DEBUG("Attack: player=%s dice=%d boss_dice=%d dmg=%d taken=%d hp=%d/%d",
               player_name, player_dice, result.boss_dice,
-              result.dmg_dealt, result.dmg_taken);
+              result.dmg_dealt, result.dmg_taken,
+              state.boss_hp, state.max_hp);
 
     GamePacket resp;
     memset(&resp, 0, sizeof(resp));

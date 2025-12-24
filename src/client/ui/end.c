@@ -2,9 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "end_ui.h"
 
 // --- VICTORY ASCII ART (金字招牌) ---
-const char *VICTORY_ART[] = {
+static const char *VICTORY_ART[] = {
     " __      __  _____   _____   _______   ____    _____   __     __",
     " \\ \\    / / |_   _| / ____| |__   __| / __ \\  |  __ \\  \\ \\   / /",
     "  \\ \\  / /    | |  | |        | |    | |  | | | |__) |  \\ \\_/ / ",
@@ -15,14 +16,8 @@ const char *VICTORY_ART[] = {
     NULL
 };
 
-int main() {
-    // 1. 初始化 ncurses
-    initscr();
-    cbreak();
-    noecho();
-    curs_set(0); // 隱藏游標
-    start_color();
-
+void ui_show_victory_screen(const char *winner_name) {
+    // 假設外部已經初始化過 ncurses
     // 2. 設定顏色
     if (has_colors()) {
         init_pair(1, COLOR_YELLOW, COLOR_BLACK); // 金色 (Victory)
@@ -63,7 +58,9 @@ int main() {
         // 每 5 個 frame (約 0.5秒) 切換一次顯示狀態
         if ((timer / 5) % 2 == 0) {
             attron(COLOR_PAIR(2) | A_BOLD);
-            char *msg = "BOSS DEFEATED! LEGENDARY VICTORY!";
+            const char *name = (winner_name && winner_name[0] != '\0') ? winner_name : "UNKNOWN HERO";
+            char msg[256];
+            snprintf(msg, sizeof(msg), "CONGRATULATIONS! The player %s killed the BOSS!", name);
             mvprintw(start_y + art_height + 2, (cols - strlen(msg)) / 2, "%s", msg);
             attroff(COLOR_PAIR(2) | A_BOLD);
         }
@@ -79,6 +76,5 @@ int main() {
     }
 
     // 結束程式
-    endwin();
-    return 0;
+    // 返回時不結束 ncurses，由外部統一管理
 }

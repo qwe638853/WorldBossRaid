@@ -142,11 +142,15 @@ void gamestate_spawn_next_boss() {
         shm->current_hp = 0;
         LOG_INFO("All Bosses Defeated. Game Complete!");
         LOG_INFO("=== CONGRATULATIONS! WORLD BOSS RAID CLEARED ===");
+        // 注意：第二隻 Boss 死時，不要清空 last_killer，讓所有 client 都能看到擊殺者名字
     }
     
-    // 解除重生鎖定，清空擊殺者
+    // 解除重生鎖定（但保留 last_killer，直到所有 client 都收到 Victory 訊息）
     shm->is_respawning = false;
-    memset(shm->last_killer, 0, sizeof(shm->last_killer));
+    // 只有第一隻 Boss 死時才清空 last_killer（因為要換第二隻）
+    if (shm->stage == BOSS_STAGE_2) {
+        memset(shm->last_killer, 0, sizeof(shm->last_killer));
+    }
     
     pthread_mutex_unlock(&shm->lock);
 }

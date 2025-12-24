@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-
+#include "bonus.h"
 // --- LUCKY MAN ASCII ART ---
-const char *LUCKY_ART[] = {
+static const char *LUCKY_ART[] = {
     " _    _   _   _____  _  __ __     __",
     "| |  | | | | / ____|| |/ / \\ \\   / /",
     "| |  | | | || |     | ' /   \\ \\_/ / ",
@@ -21,13 +21,8 @@ const char *LUCKY_ART[] = {
     NULL
 };
 
-int main() {
-    initscr();
-    cbreak();
-    noecho();
-    curs_set(0);
-    start_color();
-    srand(time(NULL));
+void ui_show_bonus_screen(void) {
+    // 假設外部已經初始化過 ncurses
 
     // 設定多種鮮豔顏色
     if (has_colors()) {
@@ -96,6 +91,5 @@ int main() {
         timer++;
     }
 
-    endwin();
-    return 0;
+    // 返回時不結束 ncurses，由外部統一管理
 }

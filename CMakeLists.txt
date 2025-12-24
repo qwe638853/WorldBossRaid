@@ -114,21 +114,26 @@ endif()
 # ============================================
 set(CLIENT_SOURCES
     src/client/client.c
-    src/client/ui/player.c
-    src/client/ui/boss.c
+    src/client/ui/client_ui.c
+    src/client/ui/login.c
+    src/client/ui/bonus.c
+    src/client/ui/end.c
     src/common/tls.c
     src/common/log.c
 )
 
 add_executable(client ${CLIENT_SOURCES})
 
-# Client 也需要 OpenSSL 和 pthread（因為使用 TLS + threads）
+# Client 也需要 OpenSSL、pthread 以及 ncurses（因為使用 TLS + threads + TUI）
+find_package(Curses REQUIRED)
+
 if(OpenSSL_FOUND)
     # 使用現代 CMake 目標
     target_link_libraries(client
         OpenSSL::SSL
         OpenSSL::Crypto
         Threads::Threads
+        ${CURSES_LIBRARIES}
     )
 else()
     # 使用傳統方式
@@ -136,12 +141,9 @@ else()
     target_link_libraries(client
         ${OPENSSL_LIBRARIES}
         Threads::Threads
+        ${CURSES_LIBRARIES}
     )
 endif()
-
-# 如果之後需要 ncurses 可以加入：
-# find_package(Curses REQUIRED)
-# target_link_libraries(client ${CURSES_LIBRARIES})
 
 # ============================================
 # 安裝規則（可選）

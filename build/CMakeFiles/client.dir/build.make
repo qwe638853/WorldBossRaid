@@ -83,38 +83,66 @@ CMakeFiles/client.dir/src/client/client.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/client.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/client.c -o CMakeFiles/client.dir/src/client/client.c.s
 
-CMakeFiles/client.dir/src/client/ui/player.c.o: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/src/client/ui/player.c.o: ../src/client/ui/player.c
-CMakeFiles/client.dir/src/client/ui/player.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/src/client/ui/player.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/player.c.o -MF CMakeFiles/client.dir/src/client/ui/player.c.o.d -o CMakeFiles/client.dir/src/client/ui/player.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/player.c
+CMakeFiles/client.dir/src/client/ui/client_ui.c.o: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/src/client/ui/client_ui.c.o: ../src/client/ui/client_ui.c
+CMakeFiles/client.dir/src/client/ui/client_ui.c.o: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/client.dir/src/client/ui/client_ui.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/client_ui.c.o -MF CMakeFiles/client.dir/src/client/ui/client_ui.c.o.d -o CMakeFiles/client.dir/src/client/ui/client_ui.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/client_ui.c
 
-CMakeFiles/client.dir/src/client/ui/player.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/player.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/player.c > CMakeFiles/client.dir/src/client/ui/player.c.i
+CMakeFiles/client.dir/src/client/ui/client_ui.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/client_ui.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/client_ui.c > CMakeFiles/client.dir/src/client/ui/client_ui.c.i
 
-CMakeFiles/client.dir/src/client/ui/player.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/player.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/player.c -o CMakeFiles/client.dir/src/client/ui/player.c.s
+CMakeFiles/client.dir/src/client/ui/client_ui.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/client_ui.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/client_ui.c -o CMakeFiles/client.dir/src/client/ui/client_ui.c.s
 
-CMakeFiles/client.dir/src/client/ui/boss.c.o: CMakeFiles/client.dir/flags.make
-CMakeFiles/client.dir/src/client/ui/boss.c.o: ../src/client/ui/boss.c
-CMakeFiles/client.dir/src/client/ui/boss.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/src/client/ui/boss.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/boss.c.o -MF CMakeFiles/client.dir/src/client/ui/boss.c.o.d -o CMakeFiles/client.dir/src/client/ui/boss.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/boss.c
+CMakeFiles/client.dir/src/client/ui/login.c.o: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/src/client/ui/login.c.o: ../src/client/ui/login.c
+CMakeFiles/client.dir/src/client/ui/login.c.o: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/client.dir/src/client/ui/login.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/login.c.o -MF CMakeFiles/client.dir/src/client/ui/login.c.o.d -o CMakeFiles/client.dir/src/client/ui/login.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/login.c
 
-CMakeFiles/client.dir/src/client/ui/boss.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/boss.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/boss.c > CMakeFiles/client.dir/src/client/ui/boss.c.i
+CMakeFiles/client.dir/src/client/ui/login.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/login.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/login.c > CMakeFiles/client.dir/src/client/ui/login.c.i
 
-CMakeFiles/client.dir/src/client/ui/boss.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/boss.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/boss.c -o CMakeFiles/client.dir/src/client/ui/boss.c.s
+CMakeFiles/client.dir/src/client/ui/login.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/login.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/login.c -o CMakeFiles/client.dir/src/client/ui/login.c.s
+
+CMakeFiles/client.dir/src/client/ui/bonus.c.o: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/src/client/ui/bonus.c.o: ../src/client/ui/bonus.c
+CMakeFiles/client.dir/src/client/ui/bonus.c.o: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/client.dir/src/client/ui/bonus.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/bonus.c.o -MF CMakeFiles/client.dir/src/client/ui/bonus.c.o.d -o CMakeFiles/client.dir/src/client/ui/bonus.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/bonus.c
+
+CMakeFiles/client.dir/src/client/ui/bonus.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/bonus.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/bonus.c > CMakeFiles/client.dir/src/client/ui/bonus.c.i
+
+CMakeFiles/client.dir/src/client/ui/bonus.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/bonus.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/bonus.c -o CMakeFiles/client.dir/src/client/ui/bonus.c.s
+
+CMakeFiles/client.dir/src/client/ui/end.c.o: CMakeFiles/client.dir/flags.make
+CMakeFiles/client.dir/src/client/ui/end.c.o: ../src/client/ui/end.c
+CMakeFiles/client.dir/src/client/ui/end.c.o: CMakeFiles/client.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/client.dir/src/client/ui/end.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/client/ui/end.c.o -MF CMakeFiles/client.dir/src/client/ui/end.c.o.d -o CMakeFiles/client.dir/src/client/ui/end.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/end.c
+
+CMakeFiles/client.dir/src/client/ui/end.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/client.dir/src/client/ui/end.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/end.c > CMakeFiles/client.dir/src/client/ui/end.c.i
+
+CMakeFiles/client.dir/src/client/ui/end.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/client.dir/src/client/ui/end.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/client/ui/end.c -o CMakeFiles/client.dir/src/client/ui/end.c.s
 
 CMakeFiles/client.dir/src/common/tls.c.o: CMakeFiles/client.dir/flags.make
 CMakeFiles/client.dir/src/common/tls.c.o: ../src/common/tls.c
 CMakeFiles/client.dir/src/common/tls.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/client.dir/src/common/tls.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/client.dir/src/common/tls.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/common/tls.c.o -MF CMakeFiles/client.dir/src/common/tls.c.o.d -o CMakeFiles/client.dir/src/common/tls.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/common/tls.c
 
 CMakeFiles/client.dir/src/common/tls.c.i: cmake_force
@@ -128,7 +156,7 @@ CMakeFiles/client.dir/src/common/tls.c.s: cmake_force
 CMakeFiles/client.dir/src/common/log.c.o: CMakeFiles/client.dir/flags.make
 CMakeFiles/client.dir/src/common/log.c.o: ../src/common/log.c
 CMakeFiles/client.dir/src/common/log.c.o: CMakeFiles/client.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/client.dir/src/common/log.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/client.dir/src/common/log.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/client.dir/src/common/log.c.o -MF CMakeFiles/client.dir/src/common/log.c.o.d -o CMakeFiles/client.dir/src/common/log.c.o -c /mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/src/common/log.c
 
 CMakeFiles/client.dir/src/common/log.c.i: cmake_force
@@ -142,8 +170,10 @@ CMakeFiles/client.dir/src/common/log.c.s: cmake_force
 # Object files for target client
 client_OBJECTS = \
 "CMakeFiles/client.dir/src/client/client.c.o" \
-"CMakeFiles/client.dir/src/client/ui/player.c.o" \
-"CMakeFiles/client.dir/src/client/ui/boss.c.o" \
+"CMakeFiles/client.dir/src/client/ui/client_ui.c.o" \
+"CMakeFiles/client.dir/src/client/ui/login.c.o" \
+"CMakeFiles/client.dir/src/client/ui/bonus.c.o" \
+"CMakeFiles/client.dir/src/client/ui/end.c.o" \
 "CMakeFiles/client.dir/src/common/tls.c.o" \
 "CMakeFiles/client.dir/src/common/log.c.o"
 
@@ -151,15 +181,19 @@ client_OBJECTS = \
 client_EXTERNAL_OBJECTS =
 
 client: CMakeFiles/client.dir/src/client/client.c.o
-client: CMakeFiles/client.dir/src/client/ui/player.c.o
-client: CMakeFiles/client.dir/src/client/ui/boss.c.o
+client: CMakeFiles/client.dir/src/client/ui/client_ui.c.o
+client: CMakeFiles/client.dir/src/client/ui/login.c.o
+client: CMakeFiles/client.dir/src/client/ui/bonus.c.o
+client: CMakeFiles/client.dir/src/client/ui/end.c.o
 client: CMakeFiles/client.dir/src/common/tls.c.o
 client: CMakeFiles/client.dir/src/common/log.c.o
 client: CMakeFiles/client.dir/build.make
 client: /usr/lib/x86_64-linux-gnu/libssl.so
 client: /usr/lib/x86_64-linux-gnu/libcrypto.so
+client: /usr/lib/x86_64-linux-gnu/libcurses.so
+client: /usr/lib/x86_64-linux-gnu/libform.so
 client: CMakeFiles/client.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable client"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/c/Users/Zhenyan/Desktop/彭祖以打BOSS/WorldBossRaid/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable client"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/client.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

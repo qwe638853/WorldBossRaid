@@ -20,7 +20,7 @@ void game_process_attack(int player_dice, const char* player_name,
     
     // 0. 安全檢查與初始化
     if (!result_out || !state_out) return;
-    
+    memset(state_out, 0, sizeof(Payload_GameState));
     // 清空結果結構 (包含新的 lucky_kill 和 streak 都會被設為 0/false)
     memset(result_out, 0, sizeof(AttackResult));
 
@@ -33,6 +33,9 @@ void game_process_attack(int player_dice, const char* player_name,
         state_out->boss_hp = current_state.current_hp;
         state_out->max_hp = current_state.max_hp;
         state_out->online_count = current_state.online_count;
+        state_out->stage = (uint8_t)current_state.stage;
+        state_out->is_respawning = current_state.is_respawning ? 1 : 0;
+        strncpy(state_out->last_killer, current_state.last_killer, MAX_PLAYER_NAME);
         return;
     }
 
@@ -116,4 +119,7 @@ void game_process_attack(int player_dice, const char* player_name,
     state_out->boss_hp = current_state.current_hp;
     state_out->max_hp = current_state.max_hp;
     state_out->online_count = current_state.online_count;
+    state_out->stage = (uint8_t)current_state.stage;
+    state_out->is_respawning = current_state.is_respawning ? 1 : 0;
+    strncpy(state_out->last_killer, current_state.last_killer, MAX_PLAYER_NAME);
 }
