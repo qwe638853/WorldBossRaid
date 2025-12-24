@@ -1,4 +1,0 @@
-/home/WorldBossRaid/build/CMakeFiles/server.dir
-/home/WorldBossRaid/build/CMakeFiles/client.dir
-/home/WorldBossRaid/build/CMakeFiles/edit_cache.dir
-/home/WorldBossRaid/build/CMakeFiles/rebuild_cache.dir
