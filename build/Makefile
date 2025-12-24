@@ -166,53 +166,101 @@ src/client/client.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/client.c.s
 .PHONY : src/client/client.c.s
 
-src/client/ui/boss.o: src/client/ui/boss.c.o
-.PHONY : src/client/ui/boss.o
+src/client/ui/bonus.o: src/client/ui/bonus.c.o
+.PHONY : src/client/ui/bonus.o
 
 # target to build an object file
-src/client/ui/boss.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/boss.c.o
-.PHONY : src/client/ui/boss.c.o
+src/client/ui/bonus.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/bonus.c.o
+.PHONY : src/client/ui/bonus.c.o
 
-src/client/ui/boss.i: src/client/ui/boss.c.i
-.PHONY : src/client/ui/boss.i
+src/client/ui/bonus.i: src/client/ui/bonus.c.i
+.PHONY : src/client/ui/bonus.i
 
 # target to preprocess a source file
-src/client/ui/boss.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/boss.c.i
-.PHONY : src/client/ui/boss.c.i
+src/client/ui/bonus.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/bonus.c.i
+.PHONY : src/client/ui/bonus.c.i
 
-src/client/ui/boss.s: src/client/ui/boss.c.s
-.PHONY : src/client/ui/boss.s
+src/client/ui/bonus.s: src/client/ui/bonus.c.s
+.PHONY : src/client/ui/bonus.s
 
 # target to generate assembly for a file
-src/client/ui/boss.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/boss.c.s
-.PHONY : src/client/ui/boss.c.s
+src/client/ui/bonus.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/bonus.c.s
+.PHONY : src/client/ui/bonus.c.s
 
-src/client/ui/player.o: src/client/ui/player.c.o
-.PHONY : src/client/ui/player.o
+src/client/ui/client_ui.o: src/client/ui/client_ui.c.o
+.PHONY : src/client/ui/client_ui.o
 
 # target to build an object file
-src/client/ui/player.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/player.c.o
-.PHONY : src/client/ui/player.c.o
+src/client/ui/client_ui.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/client_ui.c.o
+.PHONY : src/client/ui/client_ui.c.o
 
-src/client/ui/player.i: src/client/ui/player.c.i
-.PHONY : src/client/ui/player.i
+src/client/ui/client_ui.i: src/client/ui/client_ui.c.i
+.PHONY : src/client/ui/client_ui.i
 
 # target to preprocess a source file
-src/client/ui/player.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/player.c.i
-.PHONY : src/client/ui/player.c.i
+src/client/ui/client_ui.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/client_ui.c.i
+.PHONY : src/client/ui/client_ui.c.i
 
-src/client/ui/player.s: src/client/ui/player.c.s
-.PHONY : src/client/ui/player.s
+src/client/ui/client_ui.s: src/client/ui/client_ui.c.s
+.PHONY : src/client/ui/client_ui.s
 
 # target to generate assembly for a file
-src/client/ui/player.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/player.c.s
-.PHONY : src/client/ui/player.c.s
+src/client/ui/client_ui.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/client_ui.c.s
+.PHONY : src/client/ui/client_ui.c.s
+
+src/client/ui/end.o: src/client/ui/end.c.o
+.PHONY : src/client/ui/end.o
+
+# target to build an object file
+src/client/ui/end.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/end.c.o
+.PHONY : src/client/ui/end.c.o
+
+src/client/ui/end.i: src/client/ui/end.c.i
+.PHONY : src/client/ui/end.i
+
+# target to preprocess a source file
+src/client/ui/end.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/end.c.i
+.PHONY : src/client/ui/end.c.i
+
+src/client/ui/end.s: src/client/ui/end.c.s
+.PHONY : src/client/ui/end.s
+
+# target to generate assembly for a file
+src/client/ui/end.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/end.c.s
+.PHONY : src/client/ui/end.c.s
+
+src/client/ui/login.o: src/client/ui/login.c.o
+.PHONY : src/client/ui/login.o
+
+# target to build an object file
+src/client/ui/login.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/login.c.o
+.PHONY : src/client/ui/login.c.o
+
+src/client/ui/login.i: src/client/ui/login.c.i
+.PHONY : src/client/ui/login.i
+
+# target to preprocess a source file
+src/client/ui/login.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/login.c.i
+.PHONY : src/client/ui/login.c.i
+
+src/client/ui/login.s: src/client/ui/login.c.s
+.PHONY : src/client/ui/login.s
+
+# target to generate assembly for a file
+src/client/ui/login.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/client.dir/build.make CMakeFiles/client.dir/src/client/ui/login.c.s
+.PHONY : src/client/ui/login.c.s
 
 src/common/log.o: src/common/log.c.o
 .PHONY : src/common/log.o
@@ -401,12 +449,18 @@ help:
 	@echo "... src/client/client.o"
 	@echo "... src/client/client.i"
 	@echo "... src/client/client.s"
-	@echo "... src/client/ui/boss.o"
-	@echo "... src/client/ui/boss.i"
-	@echo "... src/client/ui/boss.s"
-	@echo "... src/client/ui/player.o"
-	@echo "... src/client/ui/player.i"
-	@echo "... src/client/ui/player.s"
+	@echo "... src/client/ui/bonus.o"
+	@echo "... src/client/ui/bonus.i"
+	@echo "... src/client/ui/bonus.s"
+	@echo "... src/client/ui/client_ui.o"
+	@echo "... src/client/ui/client_ui.i"
+	@echo "... src/client/ui/client_ui.s"
+	@echo "... src/client/ui/end.o"
+	@echo "... src/client/ui/end.i"
+	@echo "... src/client/ui/end.s"
+	@echo "... src/client/ui/login.o"
+	@echo "... src/client/ui/login.i"
+	@echo "... src/client/ui/login.s"
 	@echo "... src/common/log.o"
 	@echo "... src/common/log.i"
 	@echo "... src/common/log.s"

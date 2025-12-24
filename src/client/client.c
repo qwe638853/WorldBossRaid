@@ -11,9 +11,14 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <ncurses.h>
 
 #include "common/protocol.h"
 #include "common/tls.h"
+#include "client/ui/login.h"
+#include "client/ui/client_ui.h"
+
+#define UI_MAX_NAME 32  // 與 client_ui.h 一致
 
 #define SERVER_IP   "127.0.0.1"
 #define SERVER_PORT 8888
@@ -205,8 +210,8 @@ static int send_join_and_wait_resp(SSL *ssl, const char *username) {
     }
 }
 
-// 送出一次攻擊（OP_ATTACK），並等待 OP_GAME_STATE 回來
-static int send_attack_and_show_state(SSL *ssl) {
+// 送出一次攻擊（OP_ATTACK），並等待 OP_GAME_STATE 回來，結果存成 Payload_GameState
+static int net_attack_and_get_state(SSL *ssl, Payload_GameState *out_state) {
     GamePacket pkt;
     pkt_init_local(&pkt, OP_ATTACK);
 
@@ -218,8 +223,6 @@ static int send_attack_and_show_state(SSL *ssl) {
         fprintf(stderr, "Failed to send OP_ATTACK\n");
         return -1;
     }
-
-    printf("[Client] Sent OP_ATTACK\n");
 
     // 等待伺服器回傳最新遊戲狀態（OP_GAME_STATE）
     if (pkt_recv_local(ssl, &pkt) < 0) {
@@ -233,9 +236,45 @@ static int send_attack_and_show_state(SSL *ssl) {
         return -1;
     }
 
-    Payload_GameState *state = &pkt.body.game_state;
+    if (out_state) {
+        *out_state = pkt.body.game_state;
+    }
+    return 0;
+}
+
+// 給壓力測試模式沿用的版本：只印出 Boss 狀態
+static int send_attack_and_show_state(SSL *ssl) {
+    Payload_GameState state;
+    if (net_attack_and_get_state(ssl, &state) < 0) {
+        return -1;
+    }
     printf("[Client] Boss HP: %d / %d, Online Players: %d\n",
-           state->boss_hp, state->max_hp, state->online_count);
+           state.boss_hp, state.max_hp, state.online_count);
+    return 0;
+}
+
+// 送出 HEARTBEAT，取得最新 GameState
+static int net_heartbeat_get_state(SSL *ssl, Payload_GameState *out_state) {
+    GamePacket pkt;
+    pkt_init_local(&pkt, OP_HEARTBEAT);
+
+    if (pkt_send_local(ssl, &pkt, 0) < 0) {
+        fprintf(stderr, "Failed to send OP_HEARTBEAT\n");
+        return -1;
+    }
+
+    if (pkt_recv_local(ssl, &pkt) < 0) {
+        fprintf(stderr, "Failed to receive game state (heartbeat)\n");
+        return -1;
+    }
+    if (pkt.header.opcode != OP_GAME_STATE) {
+        fprintf(stderr, "Unexpected opcode after heartbeat: 0x%X\n",
+                pkt.header.opcode);
+        return -1;
+    }
+    if (out_state) {
+        *out_state = pkt.body.game_state;
+    }
     return 0;
 }
 
@@ -249,21 +288,7 @@ static int run_interactive_mode(void) {
     int sockfd = -1;
     int player_id = -1;
 
-    // 1. 輸入玩家名稱
-    char username[MAX_PLAYER_NAME];
-    printf("Enter your player name: ");
-    if (fgets(username, sizeof(username), stdin) == NULL) {
-        fprintf(stderr, "Failed to read username\n");
-        return EXIT_FAILURE;
-    }
-    // 去掉換行
-    username[strcspn(username, "\n")] = '\0';
-    if (username[0] == '\0') {
-        strncpy(username, "Player", sizeof(username) - 1);
-        username[sizeof(username) - 1] = '\0';
-    }
-
-    // 2. 初始化 TLS
+    // 1. 初始化 TLS
     tls_init_openssl();
     ctx = tls_create_client_context(CA_CERT_FILE);
     if (!ctx) {
@@ -271,26 +296,36 @@ static int run_interactive_mode(void) {
         goto cleanup;
     }
 
-    // 3. 建立 TCP 連線
+    // 2. 建立 TCP 連線
     sockfd = connect_to_server();
     if (sockfd < 0) {
         goto cleanup;
     }
 
-    // 4. 執行 TLS 握手
+    // 3. 執行 TLS 握手
     ssl = tls_client_handshake(ctx, sockfd);
     if (!ssl) {
         fprintf(stderr, "TLS handshake failed\n");
         goto cleanup;
     }
 
-    // 5. 驗證伺服器證書（如果提供了 CA 證書）
+    // 4. 驗證伺服器證書（如果提供了 CA 證書）
     if (CA_CERT_FILE != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
             fprintf(stderr, "Server certificate verification failed!\n");
             goto cleanup;
         }
     }
+
+    // 5. 啟動 ncurses，顯示登入畫面取得玩家名稱
+    char username[MAX_PLAYER_NAME] = {0};
+    initscr();
+    cbreak();
+    noecho();
+    curs_set(0);
+    start_color();
+
+    ui_login_get_player_name(username, sizeof(username));
 
     // 6. 送出 OP_JOIN 並等待回覆
     player_id = send_join_and_wait_resp(ssl, username);
@@ -299,30 +334,58 @@ static int run_interactive_mode(void) {
         goto cleanup;
     }
 
-    // 7. 簡單互動迴圈：按 'a' 攻擊、'q' 離開
-    printf("Press 'a' then Enter to attack, 'q' then Enter to quit.\n");
+    // 7. 進入 Boss 戰 UI 迴圈
+    struct {
+        SSL *ssl;
+    } ui_ctx = { ssl };
 
-    char line[16];
-    while (1) {
-        printf("> ");
-        if (fgets(line, sizeof(line), stdin) == NULL) {
-            break;
-        }
-        if (line[0] == 'q' || line[0] == 'Q') {
-            printf("[Client] Quit.\n");
-            break;
-        } else if (line[0] == 'a' || line[0] == 'A') {
-            if (send_attack_and_show_state(ssl) < 0) {
-                fprintf(stderr, "Error during attack. Closing.\n");
-                break;
-            }
-        } else {
-            printf("Unknown command. Use 'a' to attack, 'q' to quit.\n");
-        }
+    // attack callback：發送 OP_ATTACK，並轉換成 UiGameState
+    int attack_cb_impl(UiGameState *out_state) {
+        if (!out_state) return -1;
+        Payload_GameState s;
+        if (net_attack_and_get_state(ui_ctx.ssl, &s) < 0) return -1;
+        out_state->boss_hp = s.boss_hp;
+        out_state->max_hp = s.max_hp;
+        out_state->online_count = s.online_count;
+        out_state->stage = s.stage;
+        out_state->is_respawning = s.is_respawning;
+        out_state->is_crit = s.is_crit;
+        out_state->is_lucky = s.is_lucky;
+        out_state->last_player_damage = s.last_player_damage;
+        out_state->last_boss_dice = s.last_boss_dice;
+        out_state->last_player_streak = s.last_player_streak;
+        out_state->dmg_taken = s.dmg_taken;
+        strncpy(out_state->last_killer, s.last_killer, UI_MAX_NAME - 1);
+        out_state->last_killer[UI_MAX_NAME - 1] = '\0';
+        return 0;
     }
+
+    // heartbeat callback：定期詢問最新血量
+    int heartbeat_cb_impl(UiGameState *out_state) {
+        if (!out_state) return -1;
+        Payload_GameState s;
+        if (net_heartbeat_get_state(ui_ctx.ssl, &s) < 0) return -1;
+        out_state->boss_hp = s.boss_hp;
+        out_state->max_hp = s.max_hp;
+        out_state->online_count = s.online_count;
+        out_state->stage = s.stage;
+        out_state->is_respawning = s.is_respawning;
+        out_state->is_crit = 0;
+        out_state->is_lucky = 0;
+        out_state->last_player_damage = 0;
+        out_state->last_boss_dice = 0;
+        out_state->last_player_streak = 0;
+        out_state->dmg_taken = 0;
+        strncpy(out_state->last_killer, s.last_killer, UI_MAX_NAME - 1);
+        out_state->last_killer[UI_MAX_NAME - 1] = '\0';
+        return 0;
+    }
+
+    ui_game_loop(username, attack_cb_impl, heartbeat_cb_impl);
 
 cleanup:
     // 清理資源
+    endwin();
     if (ssl) {
         tls_shutdown(ssl);
         tls_free_ssl(ssl);

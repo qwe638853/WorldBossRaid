@@ -49,6 +49,15 @@ typedef struct __attribute__((packed)) {
     int32_t boss_hp;        // the current health
     int32_t max_hp;         // the maximum health (needed to draw the health bar)
     int32_t online_count;   // the number of online players (for monitoring)
+    uint8_t stage;          // which boss stage (0/1/2)
+    uint8_t is_respawning;  // 1 when boss is respawning
+    uint8_t is_crit;        // last attack was critical
+    uint8_t is_lucky;       // last attack triggered lucky kill
+    int32_t last_player_damage; // damage dealt by last attack
+    int32_t last_boss_dice;     // boss dice roll for last attack
+    int32_t last_player_streak; // current streak of attacking player
+    int32_t dmg_taken;          // damage the player took (if boss won)
+    char    last_killer[MAX_PLAYER_NAME]; // name of player who killed the last boss
 } Payload_GameState;
 
 typedef struct __attribute__((packed)) {
