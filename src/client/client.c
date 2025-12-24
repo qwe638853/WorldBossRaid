@@ -839,4 +839,3 @@ int main(int argc, char **argv) {
     // 預設：Multi-threaded 架構（UI Thread + Network Thread）
     return run_interactive_mode_threaded();
 }
->>>>>>> 59dc56b (muti-thread)
