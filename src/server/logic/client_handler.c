@@ -6,6 +6,9 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <errno.h>
 #include "common/protocol.h"
 #include "common/tls.h"
 #include "common/log.h"
@@ -30,7 +33,10 @@ static uint16_t calc_checksum(const uint8_t *data, size_t len);
 
 // 從 SSL 連線收一個 GamePacket（使用 SSL_read 進行加密接收）
 // rp: Replay Protection 狀態（用於驗證 seq_num，可為 NULL）
-static int recv_packet(SSL *ssl, GamePacket *pkt, ReplayProtection *rp);
+// timeout_sec: 超時時間（秒），0 表示無超時
+static int recv_packet_with_timeout(SSL *ssl, GamePacket *pkt, ReplayProtection *rp, int timeout_sec);
+// 內部實作：實際的封包接收邏輯
+static int recv_packet_impl(SSL *ssl, GamePacket *pkt, ReplayProtection *rp);
 
 // 對 client 回傳一個 GamePacket（使用 SSL_write 進行加密發送）
 // payload_size: 實際 payload 長度
@@ -48,6 +54,8 @@ void handle_client(SSL *ssl) {
     GamePacket packet;
     int player_id = -1;
     char username[MAX_PLAYER_NAME] = {0};
+    time_t last_heartbeat = 0; // 追蹤最後心跳時間，0 表示尚未收到任何 heartbeat
+    const time_t HEARTBEAT_TIMEOUT = 30; // 30 秒未收到 heartbeat 則斷開
 
     // 初始化 Replay Protection（防止重放攻擊）
     ReplayProtection rp;
@@ -58,8 +66,8 @@ void handle_client(SSL *ssl) {
     RateLimiter rl;
     rate_limiter_init(&rl, 5, 1);
 
-    // 接收第一包 OP_JOIN
-    if (recv_packet(ssl, &packet, &rp) < 0) {
+    // 接收第一包 OP_JOIN（JOIN 時不設超時，等待客戶端連接）
+    if (recv_packet_with_timeout(ssl, &packet, &rp, 0) < 0) {
         LOG_ERROR("Failed to receive first packet");
         goto cleanup;
     }
@@ -85,8 +93,30 @@ void handle_client(SSL *ssl) {
 
     // 進入主迴圈：處理 ATTACK / HEARTBEAT / LEAVE
     while (1) {
-        if (recv_packet(ssl, &packet, &rp) < 0) {
-            LOG_INFO("Client disconnected or recv error, closing connection");
+        // 檢查心跳超時（只有在已經收到過 heartbeat 的情況下才檢查）
+        if (last_heartbeat > 0) {
+            time_t now = time(NULL);
+            if (now - last_heartbeat > HEARTBEAT_TIMEOUT) {
+                LOG_WARN("Client %s (id=%d) heartbeat timeout (%ld seconds), closing connection", 
+                         username, player_id, (long)(now - last_heartbeat));
+                break;
+            }
+        }
+        
+        // 設定接收超時（使用 select 實現非阻塞檢測）
+        if (recv_packet_with_timeout(ssl, &packet, &rp, 5) < 0) {
+            // 檢查是否為超時（只有在已經收到過 heartbeat 的情況下才檢查）
+            if (last_heartbeat > 0) {
+                time_t current_time = time(NULL);
+                if (current_time - last_heartbeat > HEARTBEAT_TIMEOUT) {
+                    LOG_WARN("Client %s (id=%d) heartbeat timeout, closing connection", username, player_id);
+                } else {
+                    LOG_INFO("Client disconnected or recv error, closing connection");
+                }
+            } else {
+                // 尚未收到任何 heartbeat，可能是連線斷開
+                LOG_INFO("Client disconnected or recv error before first heartbeat, closing connection");
+            }
             break;
         }
         
@@ -117,6 +147,9 @@ void handle_client(SSL *ssl) {
                 break;
 
             case OP_HEARTBEAT: {
+                // 更新最後心跳時間
+                last_heartbeat = time(NULL);
+                
                 GameSharedData snap;
                 Payload_GameState state;
                 gamestate_get_snapshot(&snap);
@@ -182,11 +215,38 @@ cleanup:
     exit(0);
 }
 
-// SSL 包裝層：使用 SSL_read 取代 recv()
-// rp: Replay Protection 狀態（用於驗證 seq_num）
-static int recv_packet(SSL *ssl, GamePacket *pkt, ReplayProtection *rp) {
+// 從 SSL 連線收一個 GamePacket（使用 SSL_read 進行加密接收）
+// rp: Replay Protection 狀態（用於驗證 seq_num，可為 NULL）
+// timeout_sec: 超時時間（秒），0 表示無超時
+static int recv_packet_with_timeout(SSL *ssl, GamePacket *pkt, ReplayProtection *rp, int timeout_sec) {
     if (!ssl || !pkt) return -1;
     
+    // 取得底層 socket
+    int sockfd = SSL_get_fd(ssl);
+    if (sockfd < 0) return -1;
+    
+    // 使用 select 檢查是否有數據可讀
+    if (timeout_sec > 0) {
+        fd_set readfds;
+        struct timeval timeout;
+        
+        FD_ZERO(&readfds);
+        FD_SET(sockfd, &readfds);
+        timeout.tv_sec = timeout_sec;
+        timeout.tv_usec = 0;
+        
+        int select_ret = select(sockfd + 1, &readfds, NULL, NULL, &timeout);
+        if (select_ret == 0) {
+            // 超時
+            return -1;
+        } else if (select_ret < 0) {
+            LOG_ERROR("select() failed: %s", strerror(errno));
+            return -1;
+        }
+        // select_ret > 0 表示有數據可讀，繼續執行
+    }
+    
+    // 實際的封包接收邏輯
     ssize_t n;
     size_t received = 0;
 
