@@ -116,7 +116,7 @@ static void draw_ui() {
     int bottom_y = ui_y + 1;
     
     // 左邊：縮短命令文字，避免覆蓋
-    mvprintw(bottom_y, 2, "[SPACE] Attack    [2] Phase 2    [Q] Quit");
+    mvprintw(bottom_y, 2, "[SPACE] Attack    [Q] Quit");
     
     // 中間：骰子結果（稍微偏左，給右邊留空間）
     int dice_x = cols / 2 - 15; // 比 center_x 更靠左一點

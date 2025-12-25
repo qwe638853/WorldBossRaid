@@ -1,58 +1,56 @@
-/* src/server/security/replay_protection.c - 簡單的封包重放攻擊防護 */
+/* src/server/security/replay_protection.c - Simple replay attack protection */
 #include "replay_protection.h"
 #include "../../common/log.h"
 
-// 初始化 Replay Protection 狀態
+// Initialize the Replay Protection state
 void replay_protection_init(ReplayProtection *rp) {
     if (!rp) return;
     rp->last_seq_num = 0;
     rp->initialized = false;
 }
 
-// 驗證封包序列號，防止重放攻擊
-// 簡單策略：新封包的 seq_num 必須大於最後接收的 seq_num
-// 處理 uint32_t 溢位情況（允許從 0xFFFFFFFF 回到 0）
+// Validate packet sequence number to prevent replay attacks
+// Simple strategy: The new seq_num must be greater than the last received seq_num
+// Handles uint32_t overflow (allows rollover from 0xFFFFFFFF to 0)
 bool replay_protection_validate(ReplayProtection *rp, uint32_t seq_num) {
     if (!rp) {
         return false;
     }
 
-    // 第一個封包：直接接受
+    // First packet: accept directly
     if (!rp->initialized) {
         rp->last_seq_num = seq_num;
         rp->initialized = true;
         return true;
     }
 
-    // 檢查是否為重放封包
-    // 策略：新 seq_num 必須 > last_seq_num
-    // 但考慮溢位：如果 last_seq_num 很大（接近 0xFFFFFFFF），
-    // 而 seq_num 很小（接近 0），可能是正常的溢位，也接受
-    
-    // 簡單實作：只檢查是否等於或小於最後的 seq_num（不允許重複）
-    // 允許溢位：如果 seq_num < last_seq_num 且差距很大，可能是溢位，也接受
+    // Check for replayed packets
+    // Strategy: New seq_num must be > last_seq_num
+    // However, considering overflow: if last_seq_num is near 0xFFFFFFFF
+    // and seq_num is small (near 0), it may be a valid rollover and should be accepted
+
+    // Simple implementation: only check if equal to or less than the last seq_num (no duplicates allowed)
+    // Allow overflow: if seq_num < last_seq_num and the difference is large, might be overflow, accept it
     uint32_t diff;
     
     if (seq_num > rp->last_seq_num) {
-        // 正常情況：新封包
+        // Normal case: new packet
         diff = seq_num - rp->last_seq_num;
     } else {
-        // 可能的情況：重放或溢位
+        // Potential replay or overflow
         diff = rp->last_seq_num - seq_num;
         
-        // 如果差距很大（超過一半的 uint32_t 範圍），可能是溢位，接受
-        // 否則視為重放攻擊
+        // If the difference is large (greater than half of uint32_t), likely overflow, accept it
+        // Otherwise, treat as a replay attack
         if (diff < 0x7FFFFFFF) {
-            // 差距不大，可能是重放攻擊
             LOG_WARN("Possible replay attack detected: seq_num=%u, last_seq_num=%u (diff=%u)",
                      seq_num, rp->last_seq_num, diff);
             return false;
         }
-        // 差距很大，可能是溢位，接受
+        // Large difference, likely overflow, accept it
     }
 
-    // 更新最後接收的序列號
+    // Update the last received sequence number
     rp->last_seq_num = seq_num;
     return true;
 }
-
