@@ -44,7 +44,44 @@ int main(){
     LOG_INFO("Initializing World Boss Raid Server...");
 
     tls_init_openssl();
-    SSL_CTX *ctx = tls_create_server_context("../certs/server/server.crt", "../certs/server/server.key");
+    // 證書路徑：嘗試多個可能的相對路徑（支援從不同目錄運行）
+    // 1. 從 build/ 目錄運行：../certs/server/server.crt
+    // 2. 從專案根目錄運行：certs/server/server.crt
+    // 3. 從其他子目錄運行：../../certs/server/server.crt
+    const char *cert_paths[] = {
+        "../certs/server/server.crt",      // build/ 目錄
+        "certs/server/server.crt",          // 專案根目錄
+        "../../certs/server/server.crt",   // 子目錄（如 scriptt/heartbeat/）
+        "../../../certs/server/server.crt" // 更深層的子目錄
+    };
+    const char *key_paths[] = {
+        "../certs/server/server.key",
+        "certs/server/server.key",
+        "../../certs/server/server.key",
+        "../../../certs/server/server.key"
+    };
+    
+    const char *cert_file = NULL;
+    const char *key_file = NULL;
+    
+    // 嘗試每個路徑，找到第一個存在的
+    for (int i = 0; i < 4; i++) {
+        FILE *test = fopen(cert_paths[i], "r");
+        if (test) {
+            fclose(test);
+            cert_file = cert_paths[i];
+            key_file = key_paths[i];
+            break;
+        }
+    }
+    
+    // 如果都找不到，使用第一個路徑（會產生錯誤，但至少會顯示明確的錯誤訊息）
+    if (!cert_file) {
+        cert_file = cert_paths[0];
+        key_file = key_paths[0];
+    }
+    
+    SSL_CTX *ctx = tls_create_server_context(cert_file, key_file);
     if (!ctx) {
         LOG_ERROR("Failed to create SSL context");
         log_cleanup();

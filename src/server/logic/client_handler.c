@@ -169,6 +169,7 @@ void handle_client(SSL *ssl) {
             case OP_HEARTBEAT: {
                 // 更新最後心跳時間
                 last_heartbeat = time(NULL);
+                LOG_INFO("Received heartbeat from player %s (id=%d)", username, player_id);
                 
                 GameSharedData snap;
                 Payload_GameState state;

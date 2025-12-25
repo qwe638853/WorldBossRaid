@@ -1,0 +1,9 @@
+[INFO] 2025-12-26 02:26:24 [log.c:51] log_init(): Log system initialized (level: INFO)
+[INFO] 2025-12-26 02:26:24 [server.c:44] main(): Initializing World Boss Raid Server...
+[INFO] 2025-12-26 02:26:24 [tls.c:84] tls_create_server_context(): SSL context created successfully (cert: ../../certs/server/server.crt, key: ../../certs/server/server.key)
+[INFO] 2025-12-26 02:26:24 [server.c:90] main(): TLS context created successfully
+[INFO] 2025-12-26 02:26:24 [gamestate.c:53] gamestate_init(): Shared Memory Initialized. Boss 1 Ready (HP: 1000)
+[INFO] 2025-12-26 02:26:24 [server.c:94] main(): Game state initialized
+[INFO] 2025-12-26 02:26:24 [server.c:98] main(): Dice system initialized
+[INFO] 2025-12-26 02:26:24 [server.c:163] main(): Server listening on port 8888
+[INFO] 2025-12-26 02:26:26 [server.c:29] sigquit_handler(): Server shutting down... cleaning up IPC.

@@ -22,7 +22,30 @@
 #define SERVER_PORT 8888
 // CA 證書路徑（用於驗證伺服器證書）
 // 如果設為 NULL，則不驗證伺服器證書（僅用於開發測試）
-#define CA_CERT_FILE "../certs/ca/ca.crt"  // 或 NULL 來跳過驗證
+// 注意：實際路徑會由 get_ca_cert_path() 動態決定
+
+// 動態獲取 CA 證書路徑（處理不同的工作目錄）
+static const char *get_ca_cert_path(void) {
+    // 嘗試多個可能的相對路徑（支援從不同目錄運行）
+    const char *paths[] = {
+        "../certs/ca/ca.crt",      // build/ 目錄
+        "certs/ca/ca.crt",          // 專案根目錄
+        "../../certs/ca/ca.crt",    // 子目錄（如 scriptt/heartbeat/）
+        "../../../certs/ca/ca.crt"  // 更深層的子目錄
+    };
+    
+    // 嘗試每個路徑，找到第一個存在的
+    for (int i = 0; i < 4; i++) {
+        FILE *test = fopen(paths[i], "r");
+        if (test) {
+            fclose(test);
+            return paths[i];
+        }
+    }
+    
+    // 如果都不存在，返回 NULL（不驗證證書，僅用於開發測試）
+    return NULL;
+}
 
 // 簡單的全域序號計數器（真的要用時可以做成 thread-safe）
 static uint32_t g_seq_num = 1;
@@ -443,7 +466,8 @@ static int run_interactive_mode_threaded(void) {
     
     // 1. 初始化 TLS
     tls_init_openssl();
-    ctx = tls_create_client_context(CA_CERT_FILE);
+    const char *ca_cert_file = get_ca_cert_path();
+    ctx = tls_create_client_context(ca_cert_file);
     if (!ctx) {
         LOG_ERROR("Failed to create TLS context");
         goto cleanup_shared;
@@ -463,7 +487,7 @@ static int run_interactive_mode_threaded(void) {
     }
     
     // 4. 驗證伺服器證書（如果提供了 CA 證書）
-    if (CA_CERT_FILE != NULL) {
+    if (ca_cert_file != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
             LOG_ERROR("Server certificate verification failed!");
             goto cleanup_ssl;
@@ -603,7 +627,8 @@ static int run_interactive_mode(void) {
 
     // 1. 初始化 TLS
     tls_init_openssl();
-    ctx = tls_create_client_context(CA_CERT_FILE);
+    const char *ca_cert_file = get_ca_cert_path();
+    ctx = tls_create_client_context(ca_cert_file);
     if (!ctx) {
         LOG_ERROR("Failed to create TLS context");
         goto cleanup;
@@ -623,7 +648,7 @@ static int run_interactive_mode(void) {
     }
 
     // 4. 驗證伺服器證書（如果提供了 CA 證書）
-    if (CA_CERT_FILE != NULL) {
+    if (ca_cert_file != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
             LOG_ERROR("Server certificate verification failed!");
             goto cleanup;
@@ -739,7 +764,8 @@ static void *stress_worker_thread(void *arg) {
     }
 
     // 驗證伺服器證書（如果有提供 CA）
-    if (CA_CERT_FILE != NULL) {
+    const char *ca_cert_file = get_ca_cert_path();
+    if (ca_cert_file != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
             LOG_ERROR("[Stress %d] Server certificate verification failed", w->worker_id);
             goto cleanup;
@@ -757,13 +783,16 @@ static void *stress_worker_thread(void *arg) {
     }
 
     // 固定次數的攻擊迴圈
+    // 注意：Rate Limiting 設定為每秒最多 5 個請求
+    // 因此攻擊間隔至少需要 200ms (1000ms / 5 = 200ms)
+    // 這裡使用 250ms 以確保不會觸發 rate limit
     for (int i = 0; i < STRESS_ATTACKS_PER_WORKER; ++i) {
         if (send_attack_and_show_state(ssl) < 0) {
             LOG_ERROR("[Stress %d] Attack failed at #%d", w->worker_id, i);
             break;
         }
-        // 稍微休息一下，避免所有連線同時瞬間打完
-        usleep(100 * 1000); // 100ms
+        // 休息 250ms，確保每秒不超過 4 次攻擊（低於 rate limit 的 5 次/秒）
+        usleep(250 * 1000); // 250ms
     }
 
 cleanup:
@@ -787,7 +816,8 @@ static int run_stress_mode(void) {
              STRESS_WORKER_COUNT, STRESS_ATTACKS_PER_WORKER);
 
     tls_init_openssl();
-    ctx = tls_create_client_context(CA_CERT_FILE);
+    const char *ca_cert_file = get_ca_cert_path();
+    ctx = tls_create_client_context(ca_cert_file);
     if (!ctx) {
         LOG_ERROR("[Stress] Failed to create TLS context");
         tls_cleanup_openssl();
