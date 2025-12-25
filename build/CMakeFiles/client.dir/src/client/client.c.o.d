@@ -150,5 +150,6 @@ CMakeFiles/client.dir/src/client/client.c.o: \
  /usr/include/openssl/prov_ssl.h /usr/include/openssl/ssl2.h \
  /usr/include/openssl/ssl3.h /usr/include/openssl/tls1.h \
  /usr/include/openssl/dtls1.h /usr/include/openssl/srtp.h \
- /usr/include/openssl/err.h /home/WorldBossRaid/src/client/ui/login.h \
+ /usr/include/openssl/err.h /home/WorldBossRaid/src/common/log.h \
+ /home/WorldBossRaid/src/client/ui/login.h \
  /home/WorldBossRaid/src/client/ui/client_ui.h

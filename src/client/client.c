@@ -12,6 +12,7 @@
 
 #include "common/protocol.h"
 #include "common/tls.h"
+#include "common/log.h"
 #include "client/ui/login.h"
 #include "client/ui/client_ui.h"
 
@@ -85,12 +86,12 @@ static int pkt_send_local(SSL *ssl, GamePacket *pkt, size_t payload_size) {
     ssize_t sent = SSL_write(ssl, pkt, total);
     if (sent < 0) {
         int err = SSL_get_error(ssl, sent);
-        fprintf(stderr, "[Client] SSL_write error: %d\n", err);
+        LOG_ERROR("SSL_write error: %d", err);
         ERR_print_errors_fp(stderr);
         return -1;
     }
     if ((size_t)sent != total) {
-        fprintf(stderr, "Partial send: expected %zu, got %zd\n", total, sent);
+        LOG_ERROR("Partial send: expected %zu, got %zd", total, sent);
         return -1;
     }
     return 0;
@@ -111,7 +112,7 @@ static int pkt_recv_local(SSL *ssl, GamePacket *pkt) {
             if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
                 continue; // 重試
             }
-            fprintf(stderr, "[Client] SSL_read header error: %d\n", err);
+            LOG_ERROR("SSL_read header error: %d", err);
             ERR_print_errors_fp(stderr);
             return -1;
         }
@@ -121,7 +122,7 @@ static int pkt_recv_local(SSL *ssl, GamePacket *pkt) {
     // 檢查 length 合不合理
     if (pkt->header.length < sizeof(PacketHeader) ||
         pkt->header.length > sizeof(GamePacket)) {
-        fprintf(stderr, "Invalid packet length: %u\n", pkt->header.length);
+        LOG_ERROR("Invalid packet length: %u", pkt->header.length);
         return -1;
     }
 
@@ -138,7 +139,7 @@ static int pkt_recv_local(SSL *ssl, GamePacket *pkt) {
             if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
                 continue; // 重試
             }
-            fprintf(stderr, "[Client] SSL_read body error: %d\n", err);
+            LOG_ERROR("SSL_read body error: %d", err);
             ERR_print_errors_fp(stderr);
             return -1;
         }
@@ -149,8 +150,7 @@ static int pkt_recv_local(SSL *ssl, GamePacket *pkt) {
     uint16_t expect = calc_checksum((const uint8_t *)&pkt->body.raw[0],
                                     body_len);
     if (expect != pkt->header.checksum) {
-        fprintf(stderr, "Checksum mismatch: expect=%u, got=%u\n",
-                expect, pkt->header.checksum);
+        LOG_WARN("Checksum mismatch: expect=%u, got=%u", expect, pkt->header.checksum);
         // 先印警告，但不強制中斷
     }
 
@@ -161,7 +161,7 @@ static int pkt_recv_local(SSL *ssl, GamePacket *pkt) {
 static int connect_to_server(void) {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        perror("socket");
+        LOG_ERROR("socket() failed: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -171,18 +171,18 @@ static int connect_to_server(void) {
     serv_addr.sin_port = htons(SERVER_PORT);
 
     if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        perror("inet_pton");
+        LOG_ERROR("inet_pton() failed: %s", strerror(errno));
         close(sockfd);
         exit(EXIT_FAILURE);
     }
 
     if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("connect");
+        LOG_ERROR("connect() failed: %s", strerror(errno));
         close(sockfd);
         exit(EXIT_FAILURE);
     }
 
-    printf("[Client] Connected to server %s:%d\n", SERVER_IP, SERVER_PORT);
+    LOG_INFO("Connected to server %s:%d", SERVER_IP, SERVER_PORT);
     return sockfd;
 }
 
@@ -196,31 +196,29 @@ static int send_join_and_wait_resp(SSL *ssl, const char *username) {
     pkt.body.join.username[MAX_PLAYER_NAME - 1] = '\0';
 
     if (pkt_send_local(ssl, &pkt, sizeof(Payload_Join)) < 0) {
-        fprintf(stderr, "Failed to send OP_JOIN\n");
+        LOG_ERROR("Failed to send OP_JOIN");
         return -1;
     }
 
-    printf("[Client] Sent OP_JOIN as '%s'\n", pkt.body.join.username);
+    LOG_INFO("Sent OP_JOIN as '%s'", pkt.body.join.username);
 
     // 等待伺服器的回覆（理想情況下是 OP_JOIN_RESP）
     if (pkt_recv_local(ssl, &pkt) < 0) {
-        fprintf(stderr, "Failed to receive join response\n");
+        LOG_ERROR("Failed to receive join response");
         return -1;
     }
 
     if (pkt.header.opcode != OP_JOIN_RESP) {
-        fprintf(stderr, "Unexpected opcode after join: 0x%X\n",
-                pkt.header.opcode);
+        LOG_ERROR("Unexpected opcode after join: 0x%X", pkt.header.opcode);
         return -1;
     }
 
     Payload_JoinResp *resp = &pkt.body.join_resp;
     if (resp->status == 1) {
-        printf("[Client] Join success! Your player_id = %d\n",
-               resp->player_id);
+        LOG_INFO("Join success! Your player_id = %d", resp->player_id);
         return resp->player_id;
     } else {
-        printf("[Client] Join failed. Server status = %d\n", resp->status);
+        LOG_WARN("Join failed. Server status = %d", resp->status);
         return -1;
     }
 }
@@ -235,19 +233,18 @@ static int net_attack_and_get_state(SSL *ssl, Payload_GameState *out_state) {
     pkt.body.attack.damage = 0;
 
     if (pkt_send_local(ssl, &pkt, sizeof(Payload_Attack)) < 0) {
-        fprintf(stderr, "Failed to send OP_ATTACK\n");
+        LOG_ERROR("Failed to send OP_ATTACK");
         return -1;
     }
 
     // 等待伺服器回傳最新遊戲狀態（OP_GAME_STATE）
     if (pkt_recv_local(ssl, &pkt) < 0) {
-        fprintf(stderr, "Failed to receive game state\n");
+        LOG_ERROR("Failed to receive game state");
         return -1;
     }
 
     if (pkt.header.opcode != OP_GAME_STATE) {
-        fprintf(stderr, "Unexpected opcode after attack: 0x%X\n",
-                pkt.header.opcode);
+        LOG_ERROR("Unexpected opcode after attack: 0x%X", pkt.header.opcode);
         return -1;
     }
 
@@ -263,8 +260,8 @@ static int send_attack_and_show_state(SSL *ssl) {
     if (net_attack_and_get_state(ssl, &state) < 0) {
         return -1;
     }
-    printf("[Client] Boss HP: %d / %d, Online Players: %d\n",
-           state.boss_hp, state.max_hp, state.online_count);
+    LOG_DEBUG("Boss HP: %d / %d, Online Players: %d",
+              state.boss_hp, state.max_hp, state.online_count);
     return 0;
 }
 
@@ -274,17 +271,16 @@ static int net_heartbeat_get_state(SSL *ssl, Payload_GameState *out_state) {
     pkt_init_local(&pkt, OP_HEARTBEAT);
 
     if (pkt_send_local(ssl, &pkt, 0) < 0) {
-        fprintf(stderr, "Failed to send OP_HEARTBEAT\n");
+        LOG_ERROR("Failed to send OP_HEARTBEAT");
         return -1;
     }
 
     if (pkt_recv_local(ssl, &pkt) < 0) {
-        fprintf(stderr, "Failed to receive game state (heartbeat)\n");
+        LOG_ERROR("Failed to receive game state (heartbeat)");
         return -1;
     }
     if (pkt.header.opcode != OP_GAME_STATE) {
-        fprintf(stderr, "Unexpected opcode after heartbeat: 0x%X\n",
-                pkt.header.opcode);
+        LOG_ERROR("Unexpected opcode after heartbeat: 0x%X", pkt.header.opcode);
         return -1;
     }
     if (out_state) {
@@ -449,7 +445,7 @@ static int run_interactive_mode_threaded(void) {
     tls_init_openssl();
     ctx = tls_create_client_context(CA_CERT_FILE);
     if (!ctx) {
-        fprintf(stderr, "Failed to create TLS context\n");
+        LOG_ERROR("Failed to create TLS context");
         goto cleanup_shared;
     }
     
@@ -462,14 +458,14 @@ static int run_interactive_mode_threaded(void) {
     // 3. 執行 TLS 握手
     ssl = tls_client_handshake(ctx, sockfd);
     if (!ssl) {
-        fprintf(stderr, "TLS handshake failed\n");
+        LOG_ERROR("TLS handshake failed");
         goto cleanup_sock;
     }
     
     // 4. 驗證伺服器證書（如果提供了 CA 證書）
     if (CA_CERT_FILE != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
-            fprintf(stderr, "Server certificate verification failed!\n");
+            LOG_ERROR("Server certificate verification failed!");
             goto cleanup_ssl;
         }
     }
@@ -487,7 +483,7 @@ static int run_interactive_mode_threaded(void) {
     // 6. 送出 OP_JOIN 並等待回覆（這部分仍在主線程，因為在 login 之後）
     player_id = send_join_and_wait_resp(ssl, username);
     if (player_id < 0) {
-        fprintf(stderr, "Join failed. Exit.\n");
+        LOG_ERROR("Join failed. Exit.");
         goto cleanup_ncurses;
     }
     
@@ -495,7 +491,7 @@ static int run_interactive_mode_threaded(void) {
     net_args.ssl = ssl;
     net_args.shared = &shared;
     if (pthread_create(&network_thread, NULL, network_thread_func, &net_args) != 0) {
-        perror("pthread_create (network)");
+        LOG_ERROR("pthread_create (network) failed: %s", strerror(errno));
         goto cleanup_ncurses;
     }
     
@@ -609,7 +605,7 @@ static int run_interactive_mode(void) {
     tls_init_openssl();
     ctx = tls_create_client_context(CA_CERT_FILE);
     if (!ctx) {
-        fprintf(stderr, "Failed to create TLS context\n");
+        LOG_ERROR("Failed to create TLS context");
         goto cleanup;
     }
 
@@ -622,14 +618,14 @@ static int run_interactive_mode(void) {
     // 3. 執行 TLS 握手
     ssl = tls_client_handshake(ctx, sockfd);
     if (!ssl) {
-        fprintf(stderr, "TLS handshake failed\n");
+        LOG_ERROR("TLS handshake failed");
         goto cleanup;
     }
 
     // 4. 驗證伺服器證書（如果提供了 CA 證書）
     if (CA_CERT_FILE != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
-            fprintf(stderr, "Server certificate verification failed!\n");
+            LOG_ERROR("Server certificate verification failed!");
             goto cleanup;
         }
     }
@@ -647,7 +643,7 @@ static int run_interactive_mode(void) {
     // 6. 送出 OP_JOIN 並等待回覆
     player_id = send_join_and_wait_resp(ssl, username);
     if (player_id < 0) {
-        fprintf(stderr, "Join failed. Exit.\n");
+        LOG_ERROR("Join failed. Exit.");
         goto cleanup;
     }
 
@@ -738,14 +734,14 @@ static void *stress_worker_thread(void *arg) {
     // 使用共用的 ctx 做 TLS 握手
     ssl = tls_client_handshake(w->ctx, sockfd);
     if (!ssl) {
-        fprintf(stderr, "[Stress %d] TLS handshake failed\n", w->worker_id);
+        LOG_ERROR("[Stress %d] TLS handshake failed", w->worker_id);
         goto cleanup;
     }
 
     // 驗證伺服器證書（如果有提供 CA）
     if (CA_CERT_FILE != NULL) {
         if (tls_verify_server_certificate(ssl) != 0) {
-            fprintf(stderr, "[Stress %d] Server certificate verification failed\n", w->worker_id);
+            LOG_ERROR("[Stress %d] Server certificate verification failed", w->worker_id);
             goto cleanup;
         }
     }
@@ -756,14 +752,14 @@ static void *stress_worker_thread(void *arg) {
     // JOIN
     player_id = send_join_and_wait_resp(ssl, username);
     if (player_id < 0) {
-        fprintf(stderr, "[Stress %d] Join failed\n", w->worker_id);
+        LOG_ERROR("[Stress %d] Join failed", w->worker_id);
         goto cleanup;
     }
 
     // 固定次數的攻擊迴圈
     for (int i = 0; i < STRESS_ATTACKS_PER_WORKER; ++i) {
         if (send_attack_and_show_state(ssl) < 0) {
-            fprintf(stderr, "[Stress %d] Attack failed at #%d\n", w->worker_id, i);
+            LOG_ERROR("[Stress %d] Attack failed at #%d", w->worker_id, i);
             break;
         }
         // 稍微休息一下，避免所有連線同時瞬間打完
@@ -787,13 +783,13 @@ static int run_stress_mode(void) {
     pthread_t threads[STRESS_WORKER_COUNT];
     StressWorkerArgs args[STRESS_WORKER_COUNT];
 
-    printf("[Stress] Starting stress test with %d workers, %d attacks each...\n",
-           STRESS_WORKER_COUNT, STRESS_ATTACKS_PER_WORKER);
+    LOG_INFO("Starting stress test with %d workers, %d attacks each...",
+             STRESS_WORKER_COUNT, STRESS_ATTACKS_PER_WORKER);
 
     tls_init_openssl();
     ctx = tls_create_client_context(CA_CERT_FILE);
     if (!ctx) {
-        fprintf(stderr, "[Stress] Failed to create TLS context\n");
+        LOG_ERROR("[Stress] Failed to create TLS context");
         tls_cleanup_openssl();
         return EXIT_FAILURE;
     }
@@ -803,7 +799,7 @@ static int run_stress_mode(void) {
         args[i].ctx = ctx;
         args[i].worker_id = i;
         if (pthread_create(&threads[i], NULL, stress_worker_thread, &args[i]) != 0) {
-            perror("[Stress] pthread_create");
+            LOG_ERROR("[Stress] pthread_create failed: %s", strerror(errno));
             threads[i] = 0; // 標記這個 thread 沒有成功建立
         }
     }
@@ -818,7 +814,7 @@ static int run_stress_mode(void) {
     tls_cleanup_context(ctx);
     tls_cleanup_openssl();
 
-    printf("[Stress] All workers finished.\n");
+    LOG_INFO("[Stress] All workers finished.");
     return EXIT_SUCCESS;
 }
 
@@ -827,15 +823,24 @@ static int run_stress_mode(void) {
 // ---------------------------------------------------------------------------
 
 int main(int argc, char **argv) {
+    // 初始化日誌系統（輸出到 stderr，級別為 INFO）
+    log_init(LOG_INFO, NULL);
+    
     if (argc > 1 && strcmp(argv[1], "--stress") == 0) {
         // 壓力測試模式  ./client --stress
-        return run_stress_mode();
+        int ret = run_stress_mode();
+        log_cleanup();
+        return ret;
     }
     if (argc > 1 && strcmp(argv[1], "--single-thread") == 0) {
         // 單線程模式（備用）  ./client --single-thread
-        return run_interactive_mode();
+        int ret = run_interactive_mode();
+        log_cleanup();
+        return ret;
     }
 
     // 預設：Multi-threaded 架構（UI Thread + Network Thread）
-    return run_interactive_mode_threaded();
+    int ret = run_interactive_mode_threaded();
+    log_cleanup();
+    return ret;
 }

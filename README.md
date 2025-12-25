@@ -3,6 +3,10 @@
 **World Boss Raid** is a high-concurrency multiplayer online game system developed based on Linux System Programming. This project demonstrates a complete implementation from low-level Socket communication, custom binary protocol, multi-process/multi-thread architecture to IPC (Inter-Process Communication).
 
 The system simulates a scenario where multiple clients simultaneously attack a World Boss, and provides real-time terminal visualization interface through Ncurses.
+## Overview
+![Overview](image/overview.png)
+
+
 
 ## Key Features
 
@@ -18,12 +22,16 @@ The system simulates a scenario where multiple clients simultaneously attack a W
     * Supports **Checksum integrity verification** to prevent packet corruption.
     * Packet structure includes: Header (Length, OpCode, SeqNum) + Body (Payload Union).
 * **Security Features**
-    * **TLS/SSL Encryption**: Secure communication using OpenSSL with certificate verification.
+    * **TLS/SSL Encryption**: Secure communication using OpenSSL (TLS 1.2+) with certificate verification.
     * **Replay Attack Protection**: Sequence number validation to prevent packet replay attacks.
+    * **Rate Limiting**: Sliding window algorithm to prevent DDoS and spam attacks (5 requests/second per connection).
+    * **Input Validation**: Comprehensive validation for usernames, OpCodes, and packet sizes.
+    * **Checksum Verification**: Integrity check to detect packet corruption and tampering.
     * **Multi-level Logging System**: Configurable log levels (DEBUG, INFO, WARN, ERROR, FATAL) with file/console output support.
 * **Fault Tolerance & Stability**
-    * Implements **Graceful Shutdown**: Captures signals (SIGINT) to ensure proper release of IPC resources when the server shuts down (prevents zombie processes).
-    * Includes heartbeat mechanism and disconnection detection.
+    * Implements **Graceful Shutdown**: Captures SIGQUIT (Ctrl+\) to ensure proper release of IPC resources when the server shuts down (prevents zombie processes).
+    * **Keep-Alive/Heartbeat**: Bidirectional monitoring with timeout detection (client sends every 0.5s, server tracks last activity and closes idle connections after 30s).
+    * **Connection Timeout**: Server-side timeout detection using select() with 5-second receive timeout.
 
 ## Project Structure
 
@@ -44,22 +52,32 @@ WorldBossRaid/
 │   │   ├── server.c       # Entry point, Socket initialization, Master-Worker management
 │   │   ├── logic/         # [Business Logic Layer]
 │   │   │   ├── client_handler.h
-│   │   │   ├── client_handler.c  # Client connection handler
+│   │   │   ├── client_handler.c  # Client connection handler with heartbeat timeout
 │   │   │   ├── gamestate.h
 │   │   │   ├── gamestate.c       # IPC management (Shared Memory creation/destruction)
 │   │   │   ├── dice.h
 │   │   │   └── dice.c            # Damage calculation & probability logic
 │   │   └── security/      # [Security Layer]
 │   │       ├── replay_protection.h
-│   │       └── replay_protection.c  # Replay attack protection
+│   │       ├── replay_protection.c  # Replay attack protection
+│   │       ├── rate_limiter.h
+│   │       ├── rate_limiter.c      # Rate limiting for DDoS protection
+│   │       ├── input_validator.h
+│   │       └── input_validator.c   # Input validation
 │   │
 │   └── client/            # [Client Side]
-│       ├── client.c       # Connection establishment, packet I/O, multi-thread stress testing
+│       ├── client.c       # Connection establishment, packet I/O, multi-thread architecture
 │       └── ui/            # [UI Layer]
-│           ├── boss.c     # Ncurses rendering for Boss and health bar
-│           ├── boss.h
-│           ├── player.c  # Player status rendering
-│           └── player.h
+│           ├── client_ui.c    # Main game UI loop with Ncurses
+│           ├── client_ui.h
+│           ├── login.c        # Login screen
+│           ├── login.h
+│           ├── bonus.c        # Critical hit animation
+│           ├── bonus.h
+│           ├── god.c          # Lucky kill animation
+│           ├── god.h
+│           ├── end.c          # Victory screen
+│           └── end_ui.h
 ```
 
 ## Build & Run
@@ -138,14 +156,24 @@ Communication uses a fixed Header length + variable Body design:
 
 ### Main OpCodes
 
+**Client -> Server:**
 * `OP_JOIN (0x10)`: Player join request
 * `OP_ATTACK (0x11)`: Attack request (includes damage value)
-* `OP_GAME_STATE (0x21)`: Broadcast Boss current HP (Server -> Client)
+* `OP_LEAVE (0x12)`: Leave game request
+* `OP_HEARTBEAT (0x13)`: Keep-alive heartbeat (sent every 0.5s)
+
+**Server -> Client:**
+* `OP_JOIN_RESP (0x20)`: Join response with player_id
+* `OP_GAME_STATE (0x21)`: Broadcast Boss current HP and game state
+* `OP_ERROR (0x22)`: Error message
 
 ## Security
 
 * **TLS/SSL Encryption**: All communication is encrypted using TLS 1.2+ with server certificate verification.
 * **Replay Attack Protection**: Sequence number validation prevents replaying old packets.
+* **Rate Limiting**: Sliding window algorithm limits requests to 5 per second per connection to prevent DDoS attacks.
+* **Input Validation**: Comprehensive validation for usernames, OpCodes, and packet sizes to prevent protocol attacks.
+* **Checksum Verification**: Each packet includes a checksum to detect corruption and tampering.
 * **Certificate-based Authentication**: Server uses X.509 certificates for identity verification.
 
 ## Logging
@@ -171,17 +199,33 @@ log_cleanup();
 
 ### Server Architecture
 
-* **Master Process**: Accepts incoming connections and forks worker processes
-* **Worker Processes**: Handle individual client connections using TLS
-* **Shared Memory**: Game state (Boss HP, player count) shared across all workers
+* **Master-Worker Multi-Process**: Master process accepts connections and forks worker processes for each client
+* **Worker Processes**: Each worker process handles one client connection independently using TLS
+* **Shared Memory**: Game state (Boss HP, player count) shared across all workers via IPC
 * **Mutex Protection**: Ensures thread-safe access to shared game state
+* **Security Layer**: Each worker implements replay protection, rate limiting, and input validation
+* **Heartbeat Monitoring**: Server tracks last heartbeat time and closes idle connections after 30 seconds
 
 ### Client Architecture
 
-* **Main Thread**: Manages UI rendering (Ncurses)
-* **Worker Threads**: Handle network I/O and game logic
+* **Multi-Thread Architecture**: 
+  * **UI Thread** (Main Thread): Manages Ncurses interface rendering
+  * **Network Thread**: Handles all network I/O and game state synchronization
+* **Thread Synchronization**: Uses `pthread_mutex` and `pthread_cond` for safe data sharing
 * **TLS Connection**: Secure encrypted communication with the server
+* **Heartbeat Mechanism**: Network thread sends heartbeat every 0.5 seconds to maintain connection
+
+### Communication Flow
+
+1. **Connection**: Client establishes TCP connection, performs TLS handshake
+2. **Join**: Client sends `OP_JOIN`, server responds with `OP_JOIN_RESP` and player_id
+3. **Game Loop**: 
+   - Client sends `OP_ATTACK` or `OP_HEARTBEAT` every 0.5s
+   - Server processes requests with security checks (rate limiting, input validation)
+   - Server responds with `OP_GAME_STATE` containing latest game state
+4. **Disconnection**: Client sends `OP_LEAVE` or server detects timeout and closes connection
 
 ## License
 
 This project is for educational purposes, demonstrating Linux system programming concepts.
+

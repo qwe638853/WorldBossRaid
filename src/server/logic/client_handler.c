@@ -48,6 +48,18 @@ static int handle_join(SSL *ssl, GamePacket *pkt_in, int *out_player_id, char *o
 // 處理 OP_ATTACK：擲骰子、改 Boss HP、回最新 OP_GAME_STATE
 static int handle_attack(SSL *ssl, GamePacket *pkt_in, const char *player_name);
 
+// 清理客戶端連線資源
+static void cleanup_client(SSL *ssl, int player_id) {
+    // 清理 SSL 連線（會自動關閉底層 socket）
+    if (ssl) {
+        tls_shutdown(ssl);
+        tls_free_ssl(ssl);
+    }
+    if (player_id >= 0) {
+        gamestate_player_leave();
+    }
+}
+
 // handle client connection in worker process
 // 接收 SSL* 物件，內部自動使用 SSL_read/SSL_write 進行加密通訊
 void handle_client(SSL *ssl) {
@@ -69,26 +81,30 @@ void handle_client(SSL *ssl) {
     // 接收第一包 OP_JOIN（JOIN 時不設超時，等待客戶端連接）
     if (recv_packet_with_timeout(ssl, &packet, &rp, 0) < 0) {
         LOG_ERROR("Failed to receive first packet");
-        goto cleanup;
+        cleanup_client(ssl, player_id);
+        exit(0);
     }
     LOG_DEBUG("Received first packet: opcode=0x%02X", packet.header.opcode);
 
     // 必須先 JOIN 才能進入遊戲
     if (packet.header.opcode != OP_JOIN) {
         LOG_WARN("First packet is not OP_JOIN, opcode=0x%02X", packet.header.opcode);
-        goto cleanup;
+        cleanup_client(ssl, player_id);
+        exit(0);
     }
     
     // 驗證輸入（用戶名）
     if (!input_validate_username(packet.body.join.username)) {
         LOG_ERROR("Invalid username in OP_JOIN packet");
-        goto cleanup;
+        cleanup_client(ssl, player_id);
+        exit(0);
     }
 
     // 處理加入：分配 player_id、紀錄名稱並回傳 OP_JOIN_RESP
     if (handle_join(ssl, &packet, &player_id, username) < 0) {
         LOG_ERROR("handle_join failed");
-        goto cleanup;
+        cleanup_client(ssl, player_id);
+        exit(0);
     }
 
     // 進入主迴圈：處理 ATTACK / HEARTBEAT / LEAVE
@@ -111,7 +127,7 @@ void handle_client(SSL *ssl) {
                 if (current_time - last_heartbeat > HEARTBEAT_TIMEOUT) {
                     LOG_WARN("Client %s (id=%d) heartbeat timeout, closing connection", username, player_id);
                 } else {
-                    LOG_INFO("Client disconnected or recv error, closing connection");
+            LOG_INFO("Client disconnected or recv error, closing connection");
                 }
             } else {
                 // 尚未收到任何 heartbeat，可能是連線斷開
@@ -123,26 +139,30 @@ void handle_client(SSL *ssl) {
         // Rate Limiting 檢查（防止刷攻擊）
         if (!rate_limiter_check(&rl)) {
             LOG_WARN("Rate limit exceeded for player %s, closing connection", username);
-            goto cleanup;
+            cleanup_client(ssl, player_id);
+            exit(0);
         }
         
         // 驗證 OpCode
         if (!input_validate_opcode(packet.header.opcode)) {
             LOG_WARN("Invalid opcode from client: 0x%02X", packet.header.opcode);
-            goto cleanup;
+            cleanup_client(ssl, player_id);
+            exit(0);
         }
         
         // 驗證封包大小
         if (!input_validate_packet_size(packet.header.opcode, packet.header.length)) {
             LOG_WARN("Invalid packet size for opcode 0x%02X", packet.header.opcode);
-            goto cleanup;
+            cleanup_client(ssl, player_id);
+            exit(0);
         }
 
         switch (packet.header.opcode) {
             case OP_ATTACK:
                 if (handle_attack(ssl, &packet, username) < 0) {
                     LOG_ERROR("handle_attack failed");
-                    goto cleanup;
+                    cleanup_client(ssl, player_id);
+                    exit(0);
                 }
                 break;
 
@@ -188,14 +208,16 @@ void handle_client(SSL *ssl) {
 
                 if (send_packet(ssl, &resp, sizeof(Payload_GameState)) < 0) {
                     LOG_ERROR("Failed to send GAME_STATE for heartbeat");
-                    goto cleanup;
+                    cleanup_client(ssl, player_id);
+                    exit(0);
                 }
                 break;
             }
 
             case OP_LEAVE:
                 LOG_INFO("Client requested leave");
-                goto cleanup;
+                cleanup_client(ssl, player_id);
+                exit(0);
 
             default:
                 LOG_WARN("Unknown opcode from client: 0x%02X", packet.header.opcode);
@@ -203,15 +225,8 @@ void handle_client(SSL *ssl) {
         }
     }
 
-cleanup:
-    // 清理 SSL 連線（會自動關閉底層 socket）
-    if (ssl) {
-        tls_shutdown(ssl);
-        tls_free_ssl(ssl);
-    }
-    if (player_id >= 0) {
-        gamestate_player_leave();
-    }
+    // 正常退出（循環結束）
+    cleanup_client(ssl, player_id);
     exit(0);
 }
 
