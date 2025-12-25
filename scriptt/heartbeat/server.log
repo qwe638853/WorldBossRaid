@@ -1,0 +1,29 @@
+[INFO] 2025-12-26 02:18:17 [log.c:51] log_init(): Log system initialized (level: INFO)
+[INFO] 2025-12-26 02:18:17 [server.c:44] main(): Initializing World Boss Raid Server...
+[INFO] 2025-12-26 02:18:17 [tls.c:84] tls_create_server_context(): SSL context created successfully (cert: ../../certs/server/server.crt, key: ../../certs/server/server.key)
+[INFO] 2025-12-26 02:18:17 [server.c:90] main(): TLS context created successfully
+[INFO] 2025-12-26 02:18:17 [gamestate.c:53] gamestate_init(): Shared Memory Initialized. Boss 1 Ready (HP: 1000)
+[INFO] 2025-12-26 02:18:17 [server.c:94] main(): Game state initialized
+[INFO] 2025-12-26 02:18:17 [server.c:98] main(): Dice system initialized
+[INFO] 2025-12-26 02:18:17 [server.c:163] main(): Server listening on port 8888
+[INFO] 2025-12-26 02:18:19 [tls.c:123] tls_server_handshake(): TLS handshake successful
+[INFO] 2025-12-26 02:18:21 [client_handler.c:362] handle_join(): Player joined: name=Unknown, id=1, online=1
+[INFO] 2025-12-26 02:18:21 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:21 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:21 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:22 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:22 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:23 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:23 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:24 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:24 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:25 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:25 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:26 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:26 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:27 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:27 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:28 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:28 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:29 [client_handler.c:172] handle_client(): Received heartbeat from player Unknown (id=1)
+[INFO] 2025-12-26 02:18:29 [client_handler.c:130] handle_client(): Client disconnected or recv error, closing connection
