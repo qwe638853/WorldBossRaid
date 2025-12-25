@@ -133,7 +133,16 @@ cd build
 # Launches Ncurses interface, automatically connects and starts attacking
 ```
 
-3. **Clean Build Files**
+3. **Stress Test Mode**
+
+```bash
+cd build
+./client --stress
+# Launches 100 concurrent worker threads, each sending 20 attacks
+# Useful for testing server performance and rate limiting
+```
+
+4. **Clean Build Files**
 
 ```bash
 cd build
@@ -141,6 +150,88 @@ make clean
 # Or remove the entire build directory:
 rm -rf build
 ```
+
+## Testing Scripts
+
+The project includes automated test scripts to verify Security & Reliability features. All test scripts are located in the `scriptt/` directory.
+
+### Prerequisites
+
+Before running test scripts, ensure:
+- The project has been compiled (`make` in `build/` directory)
+- Port 8888 is not occupied by other processes
+- You have execute permissions for the scripts
+
+### Available Test Scripts
+
+#### 1. Heartbeat Test (`scriptt/heartbeat/test_heartbeat.sh`)
+
+Tests the Keep-Alive/Heartbeat mechanism:
+
+```bash
+cd scriptt/heartbeat
+./test_heartbeat.sh
+```
+
+**What it does:**
+- Starts the server in the background
+- Launches a client that sends heartbeats every 0.5 seconds
+- Runs for 10 seconds to verify heartbeat functionality
+- Checks server logs for heartbeat messages
+- Automatically cleans up old processes and log files
+
+**Expected output:**
+- ✅ Heartbeat is working (if heartbeats are detected in logs)
+- ⚠️ No heartbeat detected (if no heartbeats found)
+
+#### 2. Graceful Shutdown Test (`scriptt/graceful_shotdown/test_shutdown.sh`)
+
+Tests the graceful shutdown mechanism:
+
+```bash
+cd scriptt/graceful_shotdown
+./test_shutdown.sh
+```
+
+**What it does:**
+- Starts the server in the background
+- Checks shared memory status before shutdown
+- Sends SIGQUIT signal to the server (simulating Ctrl+\)
+- Verifies that shared memory is properly cleaned up
+- Checks server logs for shutdown messages
+- Automatically cleans up old processes and log files
+
+**Expected output:**
+- ✅ Graceful shutdown detected (if shutdown messages found in logs)
+- Shows shared memory status before and after shutdown
+
+### Test Script Features
+
+All test scripts include:
+- **Automatic Process Cleanup**: Checks for existing server processes on port 8888 and terminates them before starting new tests
+- **Log File Management**: Automatically removes old log files (`server.log`, `client.log`) before each test
+- **Error Handling**: Gracefully handles test failures and cleanup
+- **Path Independence**: Scripts can be run from any directory (they use relative paths to find executables)
+
+### Running All Tests
+
+To run all available tests:
+
+```bash
+# Test heartbeat mechanism
+cd scriptt/heartbeat && ./test_heartbeat.sh
+
+# Test graceful shutdown
+cd scriptt/graceful_shotdown && ./test_shutdown.sh
+```
+
+### Test Results
+
+Test results are saved in log files:
+- `server.log`: Server-side logs during the test
+- `client.log`: Client-side logs during the test
+
+You can review these logs to verify the functionality of each feature.
 
 ## Protocol Specification
 
@@ -175,6 +266,7 @@ Communication uses a fixed Header length + variable Body design:
 * **Input Validation**: Comprehensive validation for usernames, OpCodes, and packet sizes to prevent protocol attacks.
 * **Checksum Verification**: Each packet includes a checksum to detect corruption and tampering.
 * **Certificate-based Authentication**: Server uses X.509 certificates for identity verification.
+
 
 ## Logging
 
@@ -224,6 +316,28 @@ log_cleanup();
    - Server processes requests with security checks (rate limiting, input validation)
    - Server responds with `OP_GAME_STATE` containing latest game state
 4. **Disconnection**: Client sends `OP_LEAVE` or server detects timeout and closes connection
+
+#### Packet Capture Example
+
+The following Wireshark capture shows the TLS handshake and initial application data exchange:
+
+![Packet Capture](image/packet.png)
+
+**Key Observations:**
+- **Packets 101-103**: TCP three-way handshake (SYN, SYN-ACK, ACK)
+- **Packets 104-109**: TLSv1.3 handshake (Client Hello, Server Hello, Change Cipher Spec)
+- **Packet 110**: First Application Data (contains `OP_JOIN` packet) - sent by main thread after TLS handshake
+- **Packet 111**: Second Application Data (contains `OP_HEARTBEAT` packet) - sent immediately by Network Thread to initialize game state
+
+This demonstrates the multi-threaded client architecture where the main thread sends `OP_JOIN` and the Network Thread immediately sends `OP_HEARTBEAT` to synchronize game state. All application data is encrypted via TLS, ensuring secure communication.
+
+
+### Team Contribution
+
+1. 林威立：Server connection, security and reliability processing 
+2. 陳柏傑：Boss logic, overall game status, dice logic
+3. 余振言：Client connection and Thread
+4. 劉堯欽：Client UI 
 
 ## License
 
