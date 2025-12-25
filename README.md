@@ -39,6 +39,14 @@ The system simulates a scenario where multiple clients simultaneously attack a W
 WorldBossRaid/
 ├── CMakeLists.txt          # CMake build configuration
 ├── README.md               # Project documentation
+├── image/                  # Project images and screenshots
+│   ├── overview.png        # System overview diagram
+│   └── packet.png          # Wireshark packet capture example
+├── scriptt/                # Test scripts for Security & Reliability verification
+│   ├── heartbeat/          # Heartbeat mechanism test
+│   │   └── test_heartbeat.sh
+│   └── graceful_shotdown/  # Graceful shutdown test
+│       └── test_shutdown.sh
 ├── src/
 │   ├── common/             # [Common Layer] Protocol & Utilities
 │   │   ├── protocol.h     # Packet structure, OpCode, Payload definitions
